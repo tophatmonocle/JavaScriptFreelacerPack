@@ -1,0 +1,138 @@
+<html>
+	<head>
+		<script type="text/javascript" src="THP_Library.js"></script>
+		<script type="text/javascript" src="THP_Config.js"></script>
+	</head>
+    <body>
+        <object id="myplugin" type="application/x-monoclegl" width="480" height="320"></object>
+		<script type="text/javascript">
+			var demoJSON = {
+				title:"Symbolic Interactionism",
+				instructions:"In the following four questions, you will create a concept map relating Symbolic Interactionism, Dramaturgical Analysis, Ethnomethodology, and Grounded Theory. For the links between each concept, select the word that best describes the relationship.",
+				mediaURL:"http://dl.dropbox.com/u/6379495/graphics/SymbolicInteractionism/",
+				slug:"",
+
+				questions:
+				[{
+					type:"labeling",
+					name:"Scene1",
+					text:"Select the correct relationships between the 3 concepts shown. You may zoom out to full size or zoom in to show only the 3 concepts. Submit answer and continue to complete the rest of the concept map.",
+					x:"20",
+					y:"20",
+					width:"440",
+					height:"220",
+					image:"cMap.png",
+					image_width:"630",
+					image_height:"420",
+					tween_x:"-210",
+					tween_y:"-160",
+					labels:
+					[{
+						x:"500",
+						y:"300",
+						width:"80",
+						tolerance:"-0.01",
+						answer:"512",
+					},{
+						x:"340",
+						y:"300",
+						width:"80",
+						answer:"Studies",
+					},{
+						x:"366",
+						y:"230",
+						width:"80",
+						answer:"Creates",
+					}]
+				},{
+					type:"labeling",
+					inherit:"Scene1",
+					text:"Select the correct relationships between the 4 concepts shown.  You may zoom out to full size or zoom in to show only the 4 concepts.  Submit answer and continue to complete the rest of the concept map.",
+					tween_x:"-210",
+					tween_y:"10",
+					labels:
+					[{
+						x:"420",
+						y:"185",
+						width:"80",
+						answer:"Includes",
+					},{
+						x:"340",
+						y:"205",
+						width:"80",
+						answer:"Studies",
+					},{
+						x:"340",
+						y:"70",
+						width:"80",
+						answer:"Studies",
+					},{
+						x:"270",
+						y:"135",
+						width:"80",
+						answer:"Is",
+					}]
+				},{
+					type:"labeling",
+					inherit:"Scene1",
+					text:"Select the correct relationships between the 4 concepts shown.  You may zoom out to full size or zoom in to show only the 4 concepts.  Submit answer and continue to complete the rest of the concept map.",
+					tween_x:"0",
+					tween_y:"-160",
+					labels:
+					[{
+						x:"260",
+						y:"370",
+						width:"80",
+						answer:"Includes",
+					},{
+						x:"230",
+						y:"300",
+						width:"80",
+						answer:"Studies",
+					},{
+						x:"140",
+						y:"300",
+						width:"80",
+						answer:"Studies",
+					},{
+						x:"40",
+						y:"300",
+						width:"80",
+						answer:"Studies",
+					}]
+				},{
+					type:"labeling",
+					inherit:"Scene1",
+					text:"Select the correct relationships between the 3 concepts shown. You may zoom out to full size or zoom in to show only the 3 concepts. Submit answer to finish.",
+					text_height:"36",
+					tween_x:"0",
+					tween_y:"10",
+					labels:
+					[{
+						x:"190",
+						y:"200",
+						width:"80",
+						answer:"Includes",
+					},{
+						x:"40",
+						y:"70",
+						width:"80",
+						answer:"Is",
+					},{
+						x:"140",
+						y:"70",
+						width:"80",
+						answer:"Develops",
+					}]
+				}]
+			};
+		</script>
+		<script type="text/javascript">
+			var plugin = document.getElementById("myplugin");
+			monoclegl_initialize(plugin);
+			if(window.buildDemo) {
+				window.buildDemo(plugin,"http://thm-media.s3.amazonaws.com/edumacation/gfx/", demoJSON);
+			}
+		</script>
+    </body>
+</html>

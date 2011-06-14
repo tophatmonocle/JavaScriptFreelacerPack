@@ -1,0 +1,447 @@
+<html>
+	<head>
+		<script type="text/javascript" src="THP_Library.js"></script>
+		<script type="text/javascript" src="THP_Config.js"></script>
+	</head>
+    <body>
+        <object id="myplugin" type="application/x-monoclegl" width="480" height="320"></object>
+		<script type="text/javascript">
+		var demoJSON = {
+			title:"Fitness and Leisure",
+			instructions:"Please match the characteristic that best fit the Canadian multi-sport or multi-service organization.",
+			mediaURL:"http://dl.dropbox.com/u/6379495/graphics/",
+			slug:"",
+			questions:
+			[{
+				type:"matching",
+				text:"Q1) Match the following Organization/Service with the correct description. Draw a connection by clicking on a blue box and dragging to an orange box. Press 'Submit', then 'Next'.",
+				layout:"vertical",
+				x:"20",
+				y:"20",
+				width:"440",
+				height:"220",
+				group_a:
+				[{
+					name:"a1",
+					width:"160",
+					height:"32",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Active Healthy Kids Canada",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a2",
+					width:"160",
+					height:"48",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Active Living Alliance for Canadians with a Disability",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a3",
+					width:"160",
+					height:"32",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Active Living Coalition for Older Adults",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a4",
+					width:"160",
+					height:"48",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Canadian Council for Health and Active Living at Work",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a5",
+					width:"160",
+					height:"32",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Coalition for Active Living",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				}],
+				group_b:
+				[{
+					name:"b1",
+					width:"272",
+					height:"32",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"Annually I publish a report card on the state of physical activity for children and youth.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b2",
+					width:"272",
+					height:"32",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"My goal is to make sure that Canadians with disabilities lead active and healthy lives.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b3",
+					width:"272",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"In the Fall of 2010, we published our first issue of the magazine Silver Times for our members and partner-organizations.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b4",
+					width:"272",
+					height:"32",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"One of my main objectives is to promote physical activity in the workplace.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b5",
+					width:"272",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I represent a group of organization to advocate for public policies that support physical activity for all Canadians.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				}],
+				pairs:
+				[{
+					reference_a:"a1",
+					reference_b:"b1",
+				},{
+					reference_a:"a2",
+					reference_b:"b2",
+				},{
+					reference_a:"a3",
+					reference_b:"b3",
+				},{
+					reference_a:"a4",
+					reference_b:"b4",
+				},{
+					reference_a:"a5",
+					reference_b:"b5",
+				}],
+			},{
+				type:"matching",
+				text:"Q2) Match the following Organization/Service with the correct description. Draw a connection by clicking on a blue box and dragging to an orange box. Press 'Submit', then 'Next'.",
+				layout:"vertical",
+				x:"10",
+				y:"10",
+				width:"460",
+				height:"236",
+				group_a:
+				[{
+					name:"a1",
+					width:"144",
+					height:"80",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Canadian Council of University Physical Education and Kinesiology Administrators",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a2",
+					width:"144",
+					height:"20",
+					background_color:"BACAE3",
+					rounded_corners:"10",
+					text:"KidSport Canada",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a3",
+					width:"144",
+					height:"20",
+					background_color:"BACAE3",
+					rounded_corners:"10",
+					text:"ParticipACTION",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a4",
+					width:"144",
+					height:"20",
+					background_color:"BACAE3",
+					rounded_corners:"10",
+					text:"TransCanada Trail",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a5",
+					width:"144",
+					height:"20",
+					background_color:"BACAE3",
+					rounded_corners:"10",
+					text:"YMCA Canada",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				}],
+				group_b:
+				[{
+					name:"b1",
+					width:"288",
+					height:"64",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I am composed of deans and directors of education programs in sport studies and we regularly meet to discuss among other things, common issues and accreditation.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b2",
+					width:"288",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I financially support the sport activities of children whose parents cannot afford to pay the registration fees.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b3",
+					width:"288",
+					height:"32",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I am a marketing organization that promotes active and healthy living through various media.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b4",
+					width:"288",
+					height:"32",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I cater to hikers, walkers, cyclist, horseback riders who want to enjoy the great outdoors.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b5",
+					width:"288",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I am an organization that offers sport, fitness, and recreation programs and facilities throughout Canada.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				}],
+				pairs:
+				[{
+					reference_a:"a1",
+					reference_b:"b1",
+				},{
+					reference_a:"a2",
+					reference_b:"b2",
+				},{
+					reference_a:"a3",
+					reference_b:"b3",
+				},{
+					reference_a:"a4",
+					reference_b:"b4",
+				},{
+					reference_a:"a5",
+					reference_b:"b5",
+				}],
+			},{
+				type:"matching",
+				text:"Q3) Match the following Organization/Service with the correct description. Draw a connection by clicking on a blue box and dragging to an orange box. Press 'Submit', then 'Next'.",
+				layout:"vertical",
+				x:"20",
+				y:"20",
+				width:"440",
+				height:"220",
+				group_a:
+				[{
+					name:"a1",
+					width:"160",
+					height:"48",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Canadian Fitness and Lifestyle Research Institute",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a2",
+					width:"160",
+					height:"32",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Leisure Information Network",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a3",
+					width:"160",
+					height:"32",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Physical and Health Education Canada",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"a4",
+					width:"160",
+					height:"32",
+					background_color:"BACAE3",
+					rounded_corners:"15",
+					text:"Canadian Parks and Recreation Association",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				}],
+				group_b:
+				[{
+					name:"b1",
+					width:"272",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I conduct, promote, and monitor research and trends in physical activity to improve the health of all Canadians.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b2",
+					width:"272",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I disseminate relevant information online that is of interests to leaders in physical activity, sport for all, and recreation.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b3",
+					width:"272",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I am the professional association for physical education teachers in the primary and secondary school system.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				},{
+					name:"b4",
+					width:"272",
+					height:"48",
+					background_color:"E8D4B3",
+					rounded_corners:"15",
+					text:"I am the professional association for leaders of local governments' recreation departments in Canada.",
+					text_align:"center",
+					text_color:"000000",
+					text_size:"12",
+					vertical_padding:"2",
+					horizontal_padding:"2"
+				}],
+				pairs:
+				[{
+					reference_a:"a1",
+					reference_b:"b1",
+				},{
+					reference_a:"a2",
+					reference_b:"b2",
+				},{
+					reference_a:"a3",
+					reference_b:"b3",
+				},{
+					reference_a:"a4",
+					reference_b:"b4",
+				}],
+			}]
+		};
+		</script>
+		<script type="text/javascript">
+			var plugin = document.getElementById("myplugin");
+			monoclegl_initialize(plugin);
+			DEBUG_MODE = true;
+			if(window.buildDemo) {
+				window.buildDemo(plugin,"http://thm-media.s3.amazonaws.com/edumacation/gfx/",demoJSON);
+			}
+		</script>
+    </body>
+</html>

@@ -1,0 +1,97 @@
+<html>
+	<head>
+		<script type="text/javascript" src="THP_Library.js"></script>
+		<script type="text/javascript" src="THP_Config.js"></script>
+	</head>
+    <body>
+        <object id="myplugin" type="application/x-monoclegl" width="480" height="320"></object>
+		<script type="text/javascript">
+			var demoJSON = {
+				title:"Policy Process",
+				instructions:"Please place the following steps involved in the policy process in the order in which they should be undertaken when a new policy is created.",
+				mediaURL:"",
+				slug:"",
+
+				questions:
+				[{
+					type:"ordering",
+					text:"Q1) Order the events chronologically by dragging the items below and order them by putting the first event and at the top and the last event at the bottom.",
+					layout:"horizontal",
+					x:"20",
+					y:"20",
+					width:"440",
+					height:"220",
+					objects:
+					[{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Identify problem and/or issue that needs to be addressed.",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Develop a list of policy options that could address the problem and/or issue and analyze the strengths and weaknesses of each option.",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Make a decision about the policy selected to address the problem and/or issue and communicate this policy to appropriate individuals and groups.",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Implement the policy and ensure that appropriate skills and resources are invested in the implementation process.",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Manage and maintain the policy and ensure that necessary adjustments are made to respond to environmental challenges as they come up.",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Monitor and evaluate the policy, ensure that is addresses the problems and issues identified",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					}]
+				}]
+			};
+		</script>
+		<script type="text/javascript">
+			var plugin = document.getElementById("myplugin");
+			monoclegl_initialize(plugin);
+			if(window.buildDemo) {
+				window.buildDemo(plugin,"http://thm-media.s3.amazonaws.com/edumacation/gfx/",demoJSON);
+			}
+		</script>
+    </body>
+</html>

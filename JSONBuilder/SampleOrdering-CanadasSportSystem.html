@@ -1,0 +1,167 @@
+<html>
+	<head>
+		<script type="text/javascript" src="THP_Library.js"></script>
+		<script type="text/javascript" src="THP_Config.js"></script>
+	</head>
+    <body>
+        <object id="myplugin" type="application/x-monoclegl" width="480" height="320"></object>
+		<script type="text/javascript">
+			var demoJSON = {
+				title:"Canada's Sport System",
+				instructions:"Please place the following events in the correct chronological order.",
+				mediaURL:"",
+				slug:"",
+
+				questions:
+				[{
+					type:"ordering",
+					text:"Q1) Order the events chronologically by dragging the items below and order them by putting the first event and at the top and the last event at the bottom.",
+					layout:"horizontal",
+					x:"20",
+					y:"20",
+					width:"440",
+					height:"220",
+					objects:
+					[{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Creation of the Canadian Olympic Committee",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Creation of the professional ice hockey team Montr\u00E9al Canadiens",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Adoption of Bill C-131 An act to encourage fitness and amateur sport",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Creation of ParticipACTION",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Hosting of first Olympic Games held in Canada",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Creation of the Canadian Ministry of State for Fitness and Amateur Sport",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					}]
+				},{
+					type:"ordering",
+					text:"Q2) Order the events chronologically by dragging the items below and order them by putting the first event and at the top and the last event at the bottom.",
+					layout:"horizontal",
+					x:"20",
+					y:"20",
+					width:"440",
+					height:"220",
+					objects:
+					[{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Hosting of the first Olympic Winter Games in Canada",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Ben Johnson doping scandal at the Seoul Olympic Games",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Elimination of the Canadian Ministry of State for Fitness and Amateur Sport",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Creation of the Canadian Secretary of State for Sport position",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Publication of the Canadian Sport Policy",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					},{
+						background_color:"DFCF99",
+						rounded_corners:"15",
+						text:"Adoption of Bill C-12 An act to promote physical activity and sport",
+						text_layout:"full",
+						text_align:"left",
+						text_color:"000000",
+						text_size:"12",
+						vertical_padding:"2",
+						horizontal_padding:"10"
+					}]
+				}]
+			};
+		</script>
+		<script type="text/javascript">
+			var plugin = document.getElementById("myplugin");
+			monoclegl_initialize(plugin);
+			if(window.buildDemo) {
+				window.buildDemo(plugin,"http://thm-media.s3.amazonaws.com/edumacation/gfx/", demoJSON);
+			}
+		</script>
+    </body>
+</html>

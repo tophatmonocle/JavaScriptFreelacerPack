@@ -1,0 +1,140 @@
+<html>
+	<head>
+		<script type="text/javascript" src="THP_Library.js"></script>
+		<script type="text/javascript" src="THP_Config.js"></script>
+	</head>
+    <body>
+        <object id="myplugin" type="application/x-monoclegl" width="480" height="320"></object>
+		<script type="text/javascript">
+			var demoJSON = {
+				title:"Atomic Absorption Spectroscopy",
+				instructions:"Assemble the apparatus for AA, then use it to find a solution’s concentration.",
+				mediaURL:"http://dl.dropbox.com/u/6379495/graphics/PlacementResources/",
+				slug:"",
+
+				questions:
+				[{
+					type:"placement",
+					text:"Q1) Drag the components from below into the boxes to assemble the apparatus for atomic emission spectroscopy.  Then press submit and next.",
+					x:"20",
+					y:"20",
+					width:"440",
+					height:"220",
+					image:"Sockets.png",
+					stack_x:"147.5",
+					stack_y:"20",
+					stack_offset_x:"20",
+					stack_offset_y:"2",
+					max_distance:"70",
+					stack:
+					[{
+						name:"TestTube",
+						width:"65",
+						height:"65",
+						image:"TestTube.png",
+						image_width:"65",
+						image_height:"65",
+						background_color:"DFCF99",
+						rounded_corners:"10",
+						text_layout:"center",
+						vertical_padding:"3",
+						horizontal_padding:"3"
+					},{
+						name:"Flame",
+						width:"65",
+						height:"65",
+						image:"Flame.png",
+						image_width:"65",
+						image_height:"65",
+						background_color:"DFCF99",
+						rounded_corners:"10",
+						text_layout:"center",
+						vertical_padding:"3",
+						horizontal_padding:"3"
+					},{
+						name:"Lightbulb",
+						width:"65",
+						height:"65",
+						image:"Lightbulb.png",
+						image_width:"65",
+						image_height:"65",
+						background_color:"DFCF99",
+						rounded_corners:"10",
+						text_layout:"center",
+						vertical_padding:"3",
+						horizontal_padding:"3"
+					},{
+						name:"Photometer",
+						width:"65",
+						height:"65",
+						image:"Photometer.png",
+						image_width:"65",
+						image_height:"65",
+						background_color:"DFCF99",
+						rounded_corners:"10",
+						text_layout:"center",
+						vertical_padding:"3",
+						horizontal_padding:"3"
+					},{
+						name:"Lamda",
+						width:"65",
+						height:"65",
+						image:"Lamda.png",
+						image_width:"65",
+						image_height:"65",
+						background_color:"DFCF99",
+						rounded_corners:"10",
+						text_layout:"center",
+						vertical_padding:"3",
+						horizontal_padding:"3"
+					},{
+						name:"Computer",
+						width:"65",
+						height:"65",
+						image:"Computer.png",
+						image_width:"65",
+						image_height:"65",
+						background_color:"DFCF99",
+						rounded_corners:"10",
+						text_layout:"center",
+						vertical_padding:"3",
+						horizontal_padding:"3"
+					}],
+					sockets:
+					[{
+						point_x:"75.0",
+						point_y:"155.0",
+						correct:"TestTube"
+					},{
+						point_x:"157.5",
+						point_y:"195.0",
+						correct:"Flame"
+					},{
+						point_x:"157.5",
+						point_y:"125.0",
+						correct:"Lightbulb"
+					},{
+						point_x:"240.0",
+						point_y:"155.0",
+						correct:"Photometer"
+					},{
+						point_x:"322.5",
+						point_y:"155.0",
+						correct:"Lamda"
+					},{
+						point_x:"405.0",
+						point_y:"155.0",
+						correct:"Computer"
+					}]
+				}]
+			};
+		</script>
+		<script type="text/javascript">
+			var plugin = document.getElementById("myplugin");
+			monoclegl_initialize(plugin);
+			if(window.buildDemo) {
+				window.buildDemo(plugin,"http://thm-media.s3.amazonaws.com/edumacation/gfx/",demoJSON);
+			}
+		</script>
+    </body>
+</html>
