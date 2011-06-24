@@ -1,3 +1,213 @@
+/*! THM_circleVector.js */
+// ---------------------------------------------------------------------
+// A two dimensional vector for MGL
+// Author: Ethan Greavette
+// Created: 6/21/2011
+// Comments: A class for representing a polar angle and magnitude.
+// ---------------------------------------------------------------------
+
+/**
+A class for representing a polar angle and magnitude.
+@class circleVector
+@param  {number} passRadial The magnitude of the vector
+@param  {number} passTheta The angle of the vector
+@return {void} Nothing
+*/
+function circleVector(passRadial, passTheta)
+{
+    this.radial = 0;
+	this.theta = 0;
+
+	/**
+	Change both values of this vector and check that they are valid.
+	@param  {number} passRadial The magnitude of the vector.
+	@param  {number} passTheta The angle of the vector.
+	@return {void} Nothing.
+	*/
+	this.setVector = function(passRadial, passTheta) {
+		this.radial = passRadial;
+		this.theta = passTheta;
+		this.checkAngles();
+	};
+
+	/**
+	Create a copy of this vector and return it.
+	@param {void} Nothing.
+	@return {object} Returns a new copy of this vector.
+	*/
+	this.clone = function() {
+		var ret= new circleVector();
+		ret.setVector(this.radial, this.theta);
+		return ret;
+	};
+
+	/**
+	Add the passed angle to the current angle and check to make sure it's valid.
+	@param  {number} passTheta A new angle to add to this current angle of the vector.
+	@return {void} Nothing.
+	*/
+	this.addTheta = function(passTheta) {
+		this.theta += passTheta;
+		this.checkAngles();
+	};
+
+	/**
+	Ensure the theta angle is inbetween 0 and 360 degrees.
+	@param {void} Nothing.
+	@return {void} Nothing.
+	*/
+	this.checkAngles = function() {
+		while(this.theta < 0 || this.theta >= 360)
+		{
+			if(this.theta < 0) this.theta += 360;
+			if(this.theta >= 360) this.theta -= 360;
+		}
+	};
+
+	/**
+	Set this vector to the magnitude and angle of the passed points.
+	@param  {object} startPoint The start point of the new vector.
+	@param  {object} endPoint The end point of the new vector.
+	@return {void} Nothing.
+	*/
+	this.getPolar = function(startPoint, endPoint) {
+		var ret= -1;
+		var x = startPoint.x - endPoint.x;
+		var y = (320- startPoint.y) - (320 - endPoint.y);
+
+		// Get length
+		radial = distancePoints(startPoint,endPoint);
+
+		// do special cases first of 0, 90, 180, 270 angles
+		if (startPoint.x == endPoint.x && startPoint.y == endPoint.y) ret = 0;
+
+		if (startPoint.x == endPoint.x && startPoint.y < endPoint.y)  ret = 90;
+		if (startPoint.x == endPoint.x && startPoint.y > endPoint.y)  ret = 270;
+
+		if (startPoint.y == endPoint.y && startPoint.x > endPoint.x)  ret = 180;
+		if (startPoint.y == endPoint.y && startPoint.x < endPoint.x)  ret = 0;
+
+		// Check if we already have answer
+		if(ret != -1)
+		{
+			this.theta = ret;
+			return ret;
+		}
+
+		// test which side we are on
+		if(x < 0  && y < 0)
+			ret = Math.atan(y/x) * (180 / Math.PI);
+		else if (x < 0 && y > 0)
+			ret = 360 + Math.atan(y/x) * (180 / Math.PI);
+		else
+			ret = 180 + (Math.atan(y/x) * (180 / Math.PI));
+
+		this.theta = ret;
+		return ret;
+	};
+
+	// Make sure the passed in values are defined
+	if(passRadial===undefined) {
+		passRadial=0;
+	}
+	if(passTheta===undefined) {
+		passTheta=0;
+	}
+
+	//
+	this.setVector(passRadial, passTheta);
+}
+/*! THM_fastMath.js */
+// ---------------------------------------------------------------------
+// An optimized math library for MGL
+// Author: Ethan Greavette
+// Created: 6/21/2011
+// Comments: Create a look up table for sine and cosine values
+// ---------------------------------------------------------------------
+
+/**
+Create a look up table for sine and cosine values and wrap them into a class.
+@class THM_fastMath
+@return {void} Nothing
+@return {void} Nothing
+*/
+function THM_fastMath() {
+	var sinTable = new Array(3600);
+	var cosTable = new Array(3600);
+
+	for(var i = 0 ; i < 3600 ; i++)	{
+		sinTable[i] = Math.sin((Math.PI/1800)*i);
+		cosTable[i] = Math.cos((Math.PI/1800)*i);
+	}
+
+	/**
+	Return the sine value of the passed angle.
+	@param  {number} passAngle The angle to get the sine of.
+	@return {number} The sine value of the passed angle.
+	*/
+	this.sin = function(passAngle) {
+		this.theta = Math.round(passAngle*10);
+		this.checkAngles();
+		return sinTable[this.theta];
+	};
+
+	/**
+	Return the cosine value of the passed angle.
+	@param  {number} passAngle The angle to get the cosine of.
+	@return {number} The cosine value of the passed angle.
+	*/
+	this.cos = function(passAngle) {
+		this.theta = Math.round(passAngle*10);
+		this.checkAngles();
+		return cosTable[this.theta];
+	};
+
+	/**
+	Return the tangent value of the passed angle.
+	@param  {number} passAngle The angle to get the tangent of.
+	@return {number} The tangent value of the passed angle.
+	*/
+	this.tan = function(passAngle) {
+		this.theta = Math.round(passAngle*10);
+		this.checkAngles();
+		//Should return some arbitrary value if cosTable=0;
+		return (sinTable[this.theta]/cosTable[this.theta]);
+	};
+
+	/**
+	Ensure the theta angle is inbetween 0 and 360 degrees.
+	@param {void} Nothing.
+	@return {void} Nothing.
+	*/
+	this.checkAngles = function() {
+		while(this.theta< 0 || this.theta>= 3600)
+		{
+			if(this.theta >= 3600) {
+				this.theta -= 3600;
+			}
+			else if(this.theta < 0) {
+				this.theta += 3600;
+			}
+		}
+	};
+
+	/**
+	Takes in a point and vector then traverses the point along vector and returns the new point.
+	@param {object} passPoint The point to start with before the traversal.
+	@param {object} passCircleVector The vector to traverse the passed point along.
+	@return {object} The resulting point after the traversal.
+	*/
+	this.moveVector2D = function(passPoint,passCircleVector)
+	{
+		passCircleVector.checkAngles();
+		var tempPoint = new Point();
+
+		tempPoint.x = passPoint.x + passCircleVector.radial*this.sin(passCircleVector.theta);
+		tempPoint.y = passPoint.y + passCircleVector.radial*this.cos(passCircleVector.theta);
+
+		return tempPoint;
+	};
+}
 /*! osmosis.js */
 // ---------------------------------------------------------------------
 // Osmosis Objected Oriented Compatibility Layer for MGL
@@ -11,6 +221,13 @@
 var DEBUG_MODE = false;
 var targetURL = "www.tophatmonocle.com";
 var node_map = {};
+
+/**
+Trigger an event to a node
+@class monoclegl_trigger_event
+@param  {void} Nothing
+@return {void} Nothing
+*/
 var monoclegl_trigger_event = function() {
     try {
         var args = Array.prototype.slice.call(arguments);
@@ -23,7 +240,12 @@ var monoclegl_trigger_event = function() {
         logError("Error in trigger event.\n -> " + error);
     }
 };
-
+/**
+Setup up monocleGL trigger events
+@class monoclegl_initialize
+@param  {object} plugin The monocleGL plugin object
+@return {void} Nothing
+*/
 var monoclegl_initialize = function(plugin) {
     try {
         plugin.initialize(monoclegl_trigger_event);
@@ -32,22 +254,36 @@ var monoclegl_initialize = function(plugin) {
     }
 };
 
-// ---------------------------------------------------------------------
-// Safe debug logging
+/**
+Safe debug logging
+@class logDebug
+@param  {string} passStr The debug string to print out to console
+@return {void} Nothing
+*/
 function logDebug(passStr) {
     if(typeof console !== 'undefined' && DEBUG_MODE) {
         console.log(passStr);
     }
 }
 
-// ---------------------------------------------------------------------
-// Safe error logging
+/**
+Safe error logging
+@class logError
+@param  {string} passStr The error string to print out to console
+@return {void} Nothing
+*/
 function logError(passStr) {
     if(typeof console !== 'undefined') {
         console.log(passStr);
     }
 }
 
+/**
+The abstract layer in between the plugin and JavaScript
+@class Osmosis
+@param  {void} Nothing
+@return {void} Nothing
+*/
 function Osmosis() {
     this.boolSubscribed = false;
     this.boolCallbacks = false;
@@ -61,7 +297,19 @@ function Osmosis() {
     this.centerX = 0.5;
     this.centerY = 0.5;
 
-    this.updateCallback = function(x, y, width, height, scale, rotation, centerX, centerY) {
+	/**
+	This callback is called automatically by the plugin whenever a node position, rotation or scale changes
+	@param  {number} x The new x position of the node
+	@param  {number} y The new y position of the node
+	@param  {number} width The new width of the node
+	@param  {number} height The new height of the node
+	@param  {number} scale The new scale of the node
+	@param  {number} rotation The new rotation of the node
+	@param  {number} centerX The new x position center point of the node
+	@param  {number} centerY The new y position center point of the node
+	@return {void} Nothing
+	*/
+	this.updateCallback = function(x, y, width, height, scale, rotation, centerX, centerY) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -72,7 +320,12 @@ function Osmosis() {
         this.centerY = centerY;
     };
 
-    this.getCallbacksByType = function(type) {
+	/**
+	This function returns an array of all the callbacks for this node of the passed in type
+	@param  {string} type The type of callback we are interested in
+	@return {array} Returns a list of callbacks of the passed in type
+	*/
+	this.getCallbacksByType = function(type) {
         if (typeof type !== "string") {
             logError("getCallbacksByType argument must be string type");
         }
@@ -85,6 +338,13 @@ function Osmosis() {
         return this.callbacks[type];
     };
 
+	/**
+	Bind adds a new callback to this nodes callback list
+	@param  {string} eventType The type bucket to add the callback to
+	@param  {object} funcObject The functor (function pointer) that the callback uses
+	@param  {object} global Reference to the global namespace (for future compatibility)
+	@return {void} Nothing
+	*/
     this.bind = function(eventType, funcObject, global) {
         try {
             // Inform MGL that we are listening for events of type eventType (pruned for duplicates)
@@ -99,10 +359,20 @@ function Osmosis() {
         }
     };
 
+	/**
+	Listen lets the plugin know when it's interest in an event type
+	@param  {string} eventType The type of callback we are interested in
+	@return {void} Nothing
+	*/
     this.listen = function(eventType) {
         this.plugin.listen(this.id, eventType);
     };
 
+	/**
+	Trigger is usualy called by the plugin to notify a node that a event has occured
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.trigger = function() {
         var args = Array.prototype.slice.call(arguments);
         var event_type = args.shift();
@@ -157,11 +427,13 @@ function Osmosis() {
         }
     };
 
-    // Init function sets up the 'preemptive' position callback. This callback
-    // is called before impressionist calls Drop callbacks, Animation finished
-    // callbacks, drop down changed callbacks, etc. We maintain consistency in
-    // the JavaScript through the liberal use of this callback mechanism.
-    this.init = function() {
+
+	/**
+	Init function sets up the 'preemptive' position callback. This callback is called before impressionist calls Drop callbacks, Animation finished callbacks, drop down changed callbacks, etc. We maintain consistency in the JavaScript through the liberal use of this callback mechanism.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+	this.init = function() {
         // Add this node's instance to the node map
         node_map[this.id] = this;
 
@@ -192,12 +464,19 @@ function Osmosis() {
         this.bind("position_changed", { "obj" : this, "func" : "updateCallback" });
     };
 
-    // ----------------------------------------------------------------
-    // Accessors
+    /**
+	getID is an accessor function returns the node ID plugin number of this node
+	@param  {void} Nothing
+	@return {string} The id number of this node
+	*/
     this.getId = function() { return this.id; };
 
-    // ----------------------------------------------------------------
-    // Mutators
+    /**
+	Sets the x and y position of this node
+	@param  {number} x The new x position of this node
+	@param  {number} y The new y position of this node
+	@return {void} Nothing
+	*/
     this.setPosition = function(x, y) {
         if(typeof x !== "number" || typeof y !== "number") {
             logError("Invalid coordinates supplied for " + getId());
@@ -213,6 +492,12 @@ function Osmosis() {
         this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
     };
 
+	/**
+	Sets the width and height dimensions of this node
+	@param  {number} width The new width dimension of this node
+	@param  {number} height The new height dimension of this node
+	@return {void} Nothing
+	*/
     this.setDimensions = function(width, height) {
         if(typeof width !== "number" || typeof height !== "number") {
             logError("Invalid height or width supplied for " + getId());
@@ -228,6 +513,13 @@ function Osmosis() {
         this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
     };
 
+	/**
+	Sets the scale of this node with 1.0 being 1:1 ratio
+	@param  {number} scale The new scale of this node
+	@param  {number} centerX The new x position center point of the node
+	@param  {number} centerY The new y position center point of the node
+	@return {void} Nothing
+	*/
     this.setScale = function(scale, centerX, centerY) {
 		if(!this.checkId()) {
             return;
@@ -248,6 +540,13 @@ function Osmosis() {
         this.plugin.orientationIs(this.id, this.scale, this.rotation, this.centerX, this.centerY);
     };
 
+	/**
+	Sets the rotation of this node in degrees
+	@param  {number} rotation The new rotation of this node
+	@param  {number} centerX The new x position center point of the node
+	@param  {number} centerY The new y position center point of the node
+	@return {void} Nothing
+	*/
 	this.setRotation = function(rotation, centerX, centerY) {
 		if(!this.checkId()) {
             return;
@@ -268,7 +567,14 @@ function Osmosis() {
         this.plugin.orientationIs(this.id, this.scale, this.rotation, this.centerX, this.centerY);
     };
 
-
+	/**
+	Sets the color of this node in openGL color format
+	@param  {number} r The new amount of red in the node (range 0 to 1)
+	@param  {number} g The new amount of green in the node (range 0 to 1)
+	@param  {number} b The new amount of blue in the node (range 0 to 1)
+	@param  {number} a The new amount of alpha in the node (range 0 to 1)
+	@return {void} Nothing
+	*/
     this.setColor = function(r, g, b, a) {
         if(typeof r !== "number" || typeof g !== "number" || typeof b !== "number" || typeof a !== "number") {
             logError("Invalid RGBA values provided");
@@ -282,16 +588,29 @@ function Osmosis() {
         this.plugin.colorIs(this.id, r, g, b, a);
     };
 
+	/**
+	Toggle the visibility of this node from off to on and on to off
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.toggleVisibility = function() {
         this.plugin.toggleVisibility(this.id);
     };
 
+	/**
+	Set the visibility of this node to pass in boolean
+	@param  {boolean} visibility Set true to show node and false to hide node
+	@return {void} Nothing
+	*/
     this.setVisibility = function(visibility) {
         this.plugin.setVisibility(this.id, visibility);
     };
 
-    // ----------------------------------------------------------------
-    // Methods
+    /**
+	Add a child to a layer in the display list
+	@param  {object} child The node to be added to this layer
+	@return {void} Nothing
+	*/
     this.addChild = function(child) {
         if (child === undefined) {
             logError("trying to add undefined child");
@@ -314,6 +633,11 @@ function Osmosis() {
         }
     };
 
+	/**
+	Remove a child from a layer in the display list
+	@param  {object} child The node to be removed from this layer
+	@return {void} Nothing
+	*/
     this.removeChild = function(child) {
         if (this instanceof Sprite) {
             // TODO: error
@@ -327,23 +651,75 @@ function Osmosis() {
         }
     };
 
+	/**
+	Move a node from one location to another over a specfied amount of time
+	@param  {number} x The new absolute x position for the node to move to
+	@param  {number} y The new absolute y position for the node to move to
+	@param  {number} duration The amount of time in seconds it will take to move the node
+	@return {void} Nothing
+	@deprecated Use the addTween command instead
+	*/
     this.addMoveTo = function(x, y, duration) {
         this.plugin.addTween(this.id, "x:" + x + ",y:" + y + ",time:" + duration);
     };
 
-    this.addMoveBy = function(x, y, duration) {
+    /**
+	Move a node from one location to another over a specfied amount of time
+	@param  {number} x The new realitive x position for the node to move by
+	@param  {number} y The new realitive y position for the node to move by
+	@param  {number} duration The amount of time in seconds it will take to move the node
+	@return {void} Nothing
+	@deprecated Use the addTween command instead
+	*/
+	this.addMoveBy = function(x, y, duration) {
         var rel_x = this.x + x;
         var rel_y = this.y + y;
         this.plugin.addTween(this.id, "x:" + rel_x + ",y:" + rel_y + ",time:" + duration);
     };
 
-
-	// Empty tween studs
+	/**
+	Rotate a node from one angle to another over a specfied amount of time
+	@param  {number} angle The new absolute angle for the node to rotate to
+	@param  {number} duration The amount of time in seconds it will take to rotate the node
+	@return {void} Nothing
+	@deprecated Use the addTween command instead
+	*/
     this.addRotateTo = function(angle, duration) {};
+
+    /**
+	Rotate a node from one angle to another over a specfied amount of time
+	@param  {number} angle The new realitive angle for the node to rotate by
+	@param  {number} duration The amount of time in seconds it will take to rotate the node
+	@return {void} Nothing
+	@deprecated Use the addTween command instead
+	*/
     this.addRotateBy = function(angle, duration) {};
+
+    /**
+	Scale a node from one ratio to another over a specfied amount of time
+	@param  {number} scale The new absolute scale for the node to scale to
+	@param  {number} duration The amount of time in seconds it will take to scale the node
+	@return {void} Nothing
+	@deprecated Use the addTween command instead
+	*/
     this.addScaleTo = function(scale, duration) {};
+
+    /**
+	Scale a node from one ratio to another over a specfied amount of time
+	@param  {number} scale The new realitive scale for the node to scale by
+	@param  {number} duration The amount of time in seconds it will take to scale the node
+	@return {void} Nothing
+	@deprecated Use the addTween command instead
+	*/
     this.addScaleBy = function(scale, duration) {};
 
+	/**
+	Add a tween command to the node to change it's members over time.
+	@param  {string} command The command to send to the plugin
+	@param  {object} obj (optional) The object for JavaScript to call the callback on
+	@param  {string} callback (optional) The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addTween = function(command, obj, callback) {
    		if( typeof obj === 'undefined' || typeof callback === 'undefined' ) {
             this.plugin.addTween(this.id, command);
@@ -353,22 +729,48 @@ function Osmosis() {
         }
    	};
 
+	/**
+	Remove all the tweens for this node.  Any animations in mid action will stop.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
    	this.removeTween = function() {
    		this.plugin.removeTween(this.id);
    	};
 
+	/**
+	Pause all the tweens for this node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
 	this.pauseTween = function() {
    		this.plugin.pauseTween(this.id);
    	};
 
+	/**
+	Resume all the tweens for this node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
    	this.resumeTween = function() {
    		this.plugin.resumeTween(this.id);
    	};
 
+	/**
+	Add physics properties to this node
+	@param  {string} command The command to send to the plugin
+	@return {void} Nothing
+	*/
    	this.addPhysics = function(command) {
     		this.plugin.addPhysics(this.id, command);
    	};
 
+	/**
+	Add a joint constraint between this node and the passed child node
+	@param  {object} child The child node to constrain with this node
+	@param  {string} command The command to send to the plugin
+	@return {void} Nothing
+	*/
 	this.addJoint = function(child, command) {
 		if(child === "NULL") {
    			this.plugin.addJoint(this.id, child, command);
@@ -377,6 +779,13 @@ function Osmosis() {
    		}
    	};
 
+	/**
+	Add a callback to be trigger when two nodes collide
+	@param  {object} nodeB The node to trigger a callback when it collides with this node
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
    	this.addCollision = function(nodeB, object, callback) {
         // Bind this callback
         this.bind("physics_collision", { "node" : nodeB.id, "obj" : object, "func" : callback});
@@ -386,14 +795,32 @@ function Osmosis() {
    		this.plugin.addCollision(this.id, nodeB.id);
    	};
 
+	/**
+	Applies a force and velocity to this node
+	@param  {number} fX The new x-axis force to be applied to this node
+	@param  {number} fY The new y-axis force to be applied to this node
+	@param  {number} vX The new x-axis velocity to be applied to this node
+	@param  {number} vY The new y-axis velocity to be applied to this node
+	@return {void} Nothing
+	*/
    	this.applyForce = function(fX, fY, vX, vY) {
    		this.plugin.applyForce(this.id, fX, fY, vX, vY);
    	};
 
+	/**
+	Remove all physics properities from this node
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
    	this.removePhysics = function() {
    		this.plugin.removePhysics(this.id);
    	};
 
+	/**
+	Remove the joint constraint between this node and the child node
+	@param  {object} child The node to remove the joint from
+	@return {void} Nothing
+	*/
    	this.removeJoint = function(child) {
    		if(child === "NULL") {
    			this.plugin.removeJoint(this.id, child, command);
@@ -402,19 +829,38 @@ function Osmosis() {
    		}
    	};
 
+	/**
+	Remove the collision between this node and nodeB
+	@param  {object} nodeB The node to remove collision callback from
+	@return {void} Nothing
+	*/
    	this.removeCollision = function(nodeB) {
    		this.plugin.removeCollision(this.id, nodeB.id);
    	};
 
+	/**
+	Used to get the current position of a node from the plugin
+	@param  {void} Nothing
+	@return {void} Nothing
+	@deprecated Plugin automatically updates JavaScript of position changes in the node
+	*/
     this.getPosition = function() {
         return this.plugin.getPosition(this.id);
     };
 
-    this.update = function() {
-		// Depercaited
-    };
+	/**
+	Used to update the current position of a node from the plugin
+	@param  {void} Nothing
+	@return {void} Nothing
+	@deprecated Plugin automatically updates JavaScript of position changes in the node
+	*/
+    this.update = function() {};
 
-    // Helper functions
+    /**
+	Checks if this object has an ID meaning it's a legit node
+	@param  {void} Nothing
+	@return {boolean} True if a valid object and false otherwise
+	*/
     this.checkId = function() {
         if(this.getId() === undefined) {
             logError("Method called on uninitialized object: " + this);
@@ -424,54 +870,100 @@ function Osmosis() {
         }
     };
 
+	/**
+	Add a callback to be triggered whenever this node has started being dragged.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addDragStartCallback = function(obj, callback) {
         this.bind("mouse_drag_start", { "obj" : obj, "func" : callback });
     };
 
+	/**
+	Add a callback to be triggered each time the mouse drags this node to a new location. Warning: Called often so will cause poor preformence on a mobile device if used heavily.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addDragCallback = function(obj, callback) {
         this.bind("mouse_drag", { "obj" : obj, "func" : callback });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has finished being dragged.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addDropCallback = function(obj, callback) {
         this.bind("mouse_drop", { "obj" : obj, "func" : callback });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has another node dragged over it.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addDragEnterCallback = function(obj, callback) {
         this.bind("mouse_drag_enter", { "obj" : obj, "func" : callback });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has another node dragged out of it.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addDragExitCallback = function(obj, callback) {
         this.bind("mouse_drag_exit", { "obj" : obj, "func" : callback });
     };
 
-    // Enable / disable drag functionality for a node
+    /**
+	Enables this node to be draggable
+	@param  {boolean} draggable If true then this node is draggable and not if false.
+	@return {void} Nothing
+	*/
     this.setDraggable = function(draggable) {
         this.plugin.setDraggable(this.id, draggable);
     };
 
+	/**
+	Sets a drop target for this node
+	@param  {object} dropTarget The node which will trigger drop target events.
+	@return {void} Nothing
+	*/
     this.setDropTarget = function(dropTarget) {
         this.plugin.setDropTarget(this.id, dropTarget);
     };
 
+	/**
+	Notifies the plugin that this node wants to recieve events.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.subscribe = function() {
         if(!this.boolSubscribed) { this.plugin.subscribe(this.id); }
         this.boolSubscribed = true;
     };
 
+	/**
+	Notifies the plugin that this node does not want to recieve events.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.unsubscribe = function() {
         if(this.boolSubscribed) { this.plugin.unsubscribe(this.id); }
         this.boolSubscribed = false;
     };
 
-    this.subscribe = function() {
-        if(!this.boolSubscribed) { this.plugin.subscribe(this.id); }
-        this.boolSubscribed = true;
-    };
-
-    this.unsubscribe = function() {
-        if(this.boolSubscribed) { this.plugin.unsubscribe(this.id); }
-        this.boolSubscribed = false;
-    };
+	/**
+	Add a callback to be triggered whenever this node has the mouse move over it. Warning: Called often so will cause poor preformence on a mobile device if used heavily.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.moveCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -479,6 +971,12 @@ function Osmosis() {
         this.bind("mouse_moved", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has the mouse click down on it.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.downCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -486,6 +984,12 @@ function Osmosis() {
         this.bind("mouse_down", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has the mouse move over it. This function is a one shot call.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.overCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -493,6 +997,12 @@ function Osmosis() {
         this.bind("mouse_over", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has the mouse move out of it. This function is a one shot call.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.outCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -500,6 +1010,12 @@ function Osmosis() {
         this.bind("mouse_out", { "obj" : obj, "func" : func });
     };
 
+    /**
+	Add a callback to be triggered whenever this node has the mouse release the mouse button over it.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.upCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -507,6 +1023,12 @@ function Osmosis() {
         this.bind("mouse_up", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Add a callback to be triggered whenever this node has the mouse click and release the mouse button over it.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.clickCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -514,12 +1036,27 @@ function Osmosis() {
         this.bind("mouse_up", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Set the drag region of this node
+	@param  {number} x The x positon of the drag region
+	@param  {number} y The y positon of the drag region
+	@param  {number} width The width of the drag region
+	@param  {number} height The height of the drag region
+	@return {void} Nothing
+	*/
     this.setDragRegion = function(x, y, width, height) {
         this.plugin.setDragRegion(this.id, x, y, width, height);
     };
 
-    // ---------------------------------------------------------------------
-	// setDrag: Enables dragging for object
+    /**
+	Enables this node to be draggable
+	@param  {mouser} passMouse The object for the mouse position if javascript
+	@param  {boolean} passCenter If true then position the node so the mouse is always in the center
+	@param  {rectangle} passRect Set the drag region for the node
+	@param  {boolean} passGhost If true the display the dragged sprite as semi-transparent sprite while being dragged
+	@return {void} Nothing
+	@deprecated Use setDraggable and setDragRegion instead
+	*/
 	this.setDrag = function(passMouse, passCenter, passRect, passGhost) {
 
 		// Optional parameter for centering the sprite on the mouse
@@ -542,14 +1079,35 @@ function Osmosis() {
         this.subscribe();
 	};
 
-	// ---------------------------------------------------------------------
-	// clearDrag: Disables dragging for object
+	/**
+	Stop this node from being draggable
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
 	this.clearDrag = function() {
 		this.unsubscribe();
 	};
 }
 
-function BaseSprite(url, plugin, x, y, width, height) {
+/**
+The abstract layer in between the Osmosis and Sprites
+@class BaseSprite
+@augments Osmosis
+@param  {object} plugin The monocleGL plugin object
+@param  {string} url The URL location of the image resource to download
+@param  {number} x The x position of the sprite
+@param  {number} y The y position of the sprite
+@param  {number} width The width of the sprite
+@param  {number} height The height of the sprite
+@return {void} Nothing
+*/
+function BaseSprite(plugin, url, x, y, width, height) {
+	/**
+	Set the shape of the sprite to be either circle or square
+	@param  {string} shape Use "square" for a rectanglar sprite and "circle" for a circlar sprite
+	@return {void} Nothing
+	@deprecated Not used anymore
+	*/
     this.setShape = function(shape) {
         if(typeof shape !== "string") {
             return;
@@ -560,11 +1118,22 @@ function BaseSprite(url, plugin, x, y, width, height) {
         }
 
         // TODO: Check if shape parameter is a _valid_ string ("circle" or "square")
-
         this.plugin.shape(this.id, shape);
     };
 }
 
+/**
+The class for sprite nodes
+@class Sprite
+@augments BaseSprite
+@param  {object} plugin The monocleGL plugin object
+@param  {string} url The URL location of the image resource to download
+@param  {number} x The x position of the sprite
+@param  {number} y The y position of the sprite
+@param  {number} width The width of the sprite
+@param  {number} height The height of the sprite
+@return {void} Nothing
+*/
 function Sprite(plugin, url, x, y, width, height) {
     // Initialize everything
 	this.plugin = plugin;
@@ -581,13 +1150,27 @@ function Sprite(plugin, url, x, y, width, height) {
 
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 
-	// ---------------------------------------------------------------------
-	// setUrl: set the url of the image being drawn to this sprite
+	/**
+	Sets a new image to be used for this sprite
+	@param  {string} url The URL location of the image resource to download
+	@return {void} Nothing
+	*/
     this.setUrl = function(url) {
         this.plugin.setUrl(this.getId(), url);
     };
 }
 
+/**
+The class for layer overlay nodes
+@class Layer
+@augments Osmosis
+@param  {object} plugin The monocleGL plugin object
+@param  {number} x The x position of the sprite
+@param  {number} y The y position of the sprite
+@param  {number} width The width of the sprite
+@param  {number} height The height of the sprite
+@return {void} Nothing
+*/
 function Layer(plugin, x, y, width, height) {
     this.plugin = plugin;
     this.id = plugin.newLayer();
@@ -599,41 +1182,17 @@ function Layer(plugin, x, y, width, height) {
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 }
 
+/**
+The class for scene with quiz functions
+@class Scene
+@augments Osmosis
+@param  {object} passPlugin The monocleGL plugin object
+@param  {boolean} passStep Weather or not the question is a step questions (deprecated)
+@return {void} Nothing
+*/
 function Scene(passPlugin, passStep) {
     this.plugin = passPlugin;
     this.strInstruction = "";
-
-	// Default initQuiz callback to be replaced by the developer
-    this.initQuiz = function() {
-    		logDebug("initQuiz() default callback");
-    	};
-
-    // Default loadQuiz callback to be replaced by the developer
-    this.loadQuiz = function() {
-    		logDebug("loadQuiz() default callback");
-    	};
-
-    // Default checkAnswer callback to be replaced by the developer
-    this.checkAnswer = function() {
-    		logDebug("checkAnswer() default callback");
-    		return true;
-    	};
-
-    // Default resetQuiz callback to be replaced by the developer
-    this.resetQuiz = function() {
-    		logDebug("resetQuiz() default callback");
-    		this.loadQuiz();
-    	};
-
-    // Default showCorrectAnswer callback to be replaced by the developer
-    this.showCorrectAnswer = function() {
-    		logDebug("showCorrectAnswer() default callback");
-    	};
-
-    // Default cleanUp callback to be replaced by the developer
-    this.cleanUp = function() {
-    		logDebug("cleanUp() default callback");
-    	};
 
     // Question status flags
     this.tries = 3;
@@ -645,22 +1204,103 @@ function Scene(passPlugin, passStep) {
     this.bgLayer = new Layer(this.plugin, 0, 0, 480, 320);
     this.bgLayer.setColor(0, 0, 0, 0);
 
+	/**
+	Default initQuiz callback to be replaced by the developer
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+    this.initQuiz = function() {
+    	logDebug("initQuiz() default callback");
+    };
+
+    /**
+	Default loadQuiz callback to be replaced by the developer
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+    this.loadQuiz = function() {
+    	logDebug("loadQuiz() default callback");
+    };
+
+    /**
+	Default checkAnswer callback to be replaced by the developer
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+    this.checkAnswer = function() {
+    	logDebug("checkAnswer() default callback");
+    	return true;
+    };
+
+    /**
+	Default resetQuiz callback to be replaced by the developer
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+    this.resetQuiz = function() {
+    	logDebug("resetQuiz() default callback");
+    	this.loadQuiz();
+    };
+
+    /**
+	Default showCorrectAnswer callback to be replaced by the developer
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+    this.showCorrectAnswer = function() {
+    	logDebug("showCorrectAnswer() default callback");
+    };
+
+    /**
+	Default cleanUp callback to be replaced by the developer
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
+    this.cleanUp = function() {
+    	logDebug("cleanUp() default callback");
+    };
+
+    /**
+	Adds this scene to the plugin.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.addScene = function() {
         this.plugin.addScene(this.id);
     };
 
+	/**
+	Changes to the next scene in the plugin.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.nextScene = function() {
         this.plugin.nextScene();
     };
 
+	/**
+	Changes to the previous scene in the plugin.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.prevScene = function() {
         this.plugin.prevScene();
     };
 
+	/**
+	Sets the current scene to this one.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.setScene = function() {
         this.plugin.setScene(this.getId());
     };
 
+	/**
+	Sets the number of tries for this scene.
+	@param  {number} tries The number of tries for this scene
+	@return {void} Nothing
+	*/
     this.setTries = function(tries) {
         if(typeof tries !== "number") {
             return;
@@ -668,14 +1308,29 @@ function Scene(passPlugin, passStep) {
         this.tries = tries;
     };
 
+	/**
+	Decrements the number of tries by one.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.decrementTries = function() {
         if(!(this.tries === 0)) {
             this.tries = this.tries - 1;
         }
     };
 
+	/**
+	Gets the number of tries for this scene.
+	@param  {void} Nothing
+	@return {number} The number of tries for this scene
+	*/
     this.getTries = function() { return this.tries; };
 
+	/**
+	Sets if the scene is correct
+	@param  {boolean} correct True if this scene is correct and false otherwise
+	@return {void} Nothing
+	*/
     this.setCorrect = function(correct) {
         if(typeof correct !== "boolean") {
             logError("correct must have a value of type 'boolean'");
@@ -685,8 +1340,18 @@ function Scene(passPlugin, passStep) {
         this.completed = true;
     };
 
+	/**
+	Gets if the scene is correct
+	@param  {void} Nothing
+	@return {boolean} True if this scene is correct and false otherwise
+	*/
     this.getCorrect = function() { return this.correct; };
 
+	/**
+	Sets if the scene is completed
+	@param  {boolean} completed True if this scene is completed and false otherwise
+	@return {void} Nothing
+	*/
     this.setCompleted = function(completed) {
         if(typeof completed !== "boolean") {
             logError("completed must have a value of type 'boolean'");
@@ -695,8 +1360,18 @@ function Scene(passPlugin, passStep) {
         this.completed = completed;
     };
 
+	/**
+	Gets if the scene is completed
+	@param  {void} Nothing
+	@return {boolean} True if this scene is completed and false otherwise
+	*/
     this.getCompleted = function() { return this.completed; };
 
+	/**
+	Sets if the scene status has been recieved by the server
+	@param  {boolean} serverStatus True if this scenes status has been recieved by the server and false otherwise
+	@return {void} Nothing
+	*/
     this.setServerStatus = function(serverStatus) {
         if(typeof serverStatus !== "boolean") {
             logError("serverStatus must have a value of type 'boolean'");
@@ -705,10 +1380,27 @@ function Scene(passPlugin, passStep) {
         this.serverStatus = serverStatus;
     };
 
+	/**
+	Gets if the scene status has been recieved by the server
+	@param  {void} Nothing
+	@return {boolean} True if this scenes status has been recieved by the server and false otherwise
+	*/
     this.getServerStatus = function() { return this.serverStatus; };
 }
 
+/**
+The class for the base definations of labels and textboxes
+@class BaseLabel
+@augments Osmosis
+@param  {void} Nothing
+@return {void} Nothing
+*/
 function BaseLabel() {
+	/**
+	Sets the string that will be displayed
+	@param  {string} text The string to be displayed inside label/textbox.
+	@return {void} Nothing
+	*/
     this.setText = function(text) {
         if(typeof text == "string") {
             this.text = text;
@@ -722,48 +1414,90 @@ function BaseLabel() {
         this.plugin.captionIs(this.id, this.text);
     };
 
+	/**
+	Sets the text caption color of this node in openGL color format.
+	@param  {number} r The new amount of red in the node (range 0 to 1).
+	@param  {number} g The new amount of green in the node (range 0 to 1).
+	@param  {number} b The new amount of blue in the node (range 0 to 1).
+	@param  {number} a The new amount of alpha in the node (range 0 to 1).
+	@return {void} Nothing
+	*/
     this.setCaptionColor = function(r, g, b, a) {
         this.plugin.captionColorIs(this.id, r, g, b, a);
     };
 
+	/**
+	Sets the text to wrap once it reach the length of the label/textbox.
+	@param  {boolean} wrap If true the text will wrap around and otherwise the text will continue to the right until finished.
+	@return {void} Nothing
+	*/
     this.setWrap = function(wrap) {
         if (typeof wrap != "boolean") {
             // error...
             return;
         }
-
         this.plugin.wrapText(this.id, wrap);
     };
 
+	/**
+	Tells the plugin to attach a key listener event to this node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.addKeyListener = function() {
         this.plugin.addKeyListener(this.id);
     };
 
+	/**
+	Set this label/textbox to use the bold font included in the plugin
+	@param  {boolean} bold If true set the font to be bold otherwise set it regular.
+	@return {void} Nothing
+	*/
     this.setBold = function(bold) {
         if (typeof bold != "boolean") {
             return;
         }
-
         this.plugin.setBold(this.id, bold);
     };
 
+	/**
+	Set this label/textbox to use the italic font included in the plugin
+	@param  {boolean} italic If true set the font to be italic otherwise set it regular.
+	@return {void} Nothing
+	*/
     this.setItalic = function(italic) {
         if (typeof italic != "boolean") {
             return;
         }
-
         this.plugin.setItalic(this.id, italic);
     };
 
+	/**
+	Set the anchor of this label to be left, right or centered.
+	@param  {string} anchor Side the alignment of the label to be "left", "right" or "center"
+	@return {void} Nothing
+	*/
     this.setAnchor = function(anchor) {
         if (typeof anchor !== "string") {
             return;
         }
-
         this.plugin.setAnchor(this.id, anchor);
     };
 }
 
+/**
+The class for a dynamic label of text
+@class Label
+@augments BaseLabel
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {string} text The string to be displayed in the label.
+@param	{number} size The in points of the font used.
+@param  {number} x The x position of the label.
+@param  {number} y The y position of the label.
+@param  {number} width The width of the label.
+@param  {number} height The height of the label.
+@return {void} Nothing
+*/
 function Label(plugin, text, size, x, y, width, height) {
     this.plugin = plugin;
     this.id = this.plugin.newLabel(text, size);
@@ -778,6 +1512,19 @@ function Label(plugin, text, size, x, y, width, height) {
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 }
 
+/**
+The class for a dynamic textbox
+@class TextBox
+@augments BaseLabel
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {string} text The string to be displayed in the textbox.
+@param	{number} size The in points of the font used.
+@param  {number} x The x position of the textbox.
+@param  {number} y The y position of the textbox.
+@param  {number} width The width of the textbox.
+@param  {number} height The height of the textbox.
+@return {void} Nothing
+*/
 function TextBox(plugin, text, size, x, y, width, height) {
     this.plugin = plugin;
     this.id = plugin.newTextBox(text, size);
@@ -789,13 +1536,23 @@ function TextBox(plugin, text, size, x, y, width, height) {
     this.init();
     this.bind("text_changed", { "obj" : this, "func" : "updateText" });
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
-    this.addKeyListener(this.getId());
+    this.plugin.addKeyListener(this.getId());
 
+	/**
+	An automatically setup callback that triggers whenever the text changes.
+	@param  {string} text The string displayed in the textbox.
+	@return {void} Nothing
+	*/
     this.updateText = function(text) {
-        logDebug("UPDATED: " + text);
         this.text = text;
     };
 
+	/**
+	Add a callback to be triggered whenever this node recieves an enter callback
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addEnterCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -803,6 +1560,12 @@ function TextBox(plugin, text, size, x, y, width, height) {
         this.bind("enter_pressed", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Add a callback to be triggered whenever this node recieves or looses focus
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addFocusChangedCallback = function(obj, func) {
         if(typeof obj != "object") {
             return;
@@ -810,6 +1573,11 @@ function TextBox(plugin, text, size, x, y, width, height) {
         this.bind("focus_changed", { "obj" : obj, "func" : func });
     };
 
+	/**
+	Allow textboxes to recieve events if set to be true
+	@param  {boolean} interaction If true allow interaction with textbox else block interaction
+	@return {void} Nothing
+	*/
     this.setInteraction = function(interaction) {
         if(typeof interaction != "boolean") {
             return;
@@ -817,11 +1585,28 @@ function TextBox(plugin, text, size, x, y, width, height) {
         this.plugin.setTextBoxInteraction(this.getId(), interaction);
     };
 
+	/**
+	Return the text value of the textbox
+	@param  {void} Nothing
+	@return {string} The string current inside the textbox
+	*/
     this.getText = function() {
         return this.text;
     };
 }
 
+/**
+The class for the interactive button node with one of the presets "submit", "answer", "nextScene", "prevScene", "refresh", "explore", "ok", "ready", "smallArrowDown", "smallArrowLeft", "smallArrowRight" and "smallArrowUp".
+@class Button
+@augments Sprite
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {string} type The type of button to be displayed.
+@param  {number} x The x position of the button.
+@param  {number} y The y position of the button.
+@param  {number} width The width of the button.
+@param  {number} height The height of the button.
+@return {void} Nothing
+*/
 function Button(plugin, type, x, y, width, height) {
     // Initialize everything
     this.plugin = plugin;
@@ -834,6 +1619,11 @@ function Button(plugin, type, x, y, width, height) {
     this.init();
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 
+	/**
+	Allows button to recieve events if set to be true.
+	@param  {boolean} active If true allow interaction and display the active state button otherwise disable interaction and display the inactive state.
+	@return {void} Nothing
+	*/
     this.setActive = function(active) {
         if(typeof active != "boolean") {
             return;
@@ -849,6 +1639,18 @@ function Button(plugin, type, x, y, width, height) {
     };
 }
 
+/**
+The class for the interactive button node
+@class Primitive
+@augments Osmosis
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {string} shape The type of primitive to be displayed ("rectangle", "circle" or "line").
+@param  {number} x The x position of the primitive.
+@param  {number} y The y position of the primitive.
+@param  {number} width The width of the primitive.
+@param  {number} height The height of the primitive.
+@return {void} Nothing
+*/
 function Primitive(plugin, shape, x, y, width, height) {
     // Initialize everything
     this.plugin = plugin;
@@ -865,24 +1667,61 @@ function Primitive(plugin, shape, x, y, width, height) {
     this.init();
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 
+	/**
+	Set the postion and dimensions of this primitive.
+	@param  {number} x1 The x position of the primitive.
+	@param  {number} y1 The y position of the primitive.
+	@param  {number} x2 The new width of the primitive.
+	@param  {number} y2 The new height of the primitive.
+	@return {void} Nothing
+	*/
     this.setPoints = function(x1, y1, x2, y2) {
         this.setPosition(x1, y1);
         this.setDimensions(x2, y2);
     };
 
+	/**
+	Set the corner radius of a rectangle.
+	@param  {number} radius The corner radius of a rectangle in pixels.
+	@return {void} Nothing
+	*/
     this.setCornerRadius = function(radius) {
         this.plugin.setRectangleCornerRadius(this.getId(), radius);
     };
 
+	/**
+	Set the border width of a rectangle.
+	@param  {number} width The border width of a rectangle in pixels.
+	@return {void} Nothing
+	*/
     this.setBorderWidth = function(width) {
         this.plugin.setBorderWidth(this.getId(), width);
     };
 
+	/**
+	Set the color of the rectangles border in openGL color format.
+	@param  {number} r The new amount of red in the node (range 0 to 1).
+	@param  {number} g The new amount of green in the node (range 0 to 1).
+	@param  {number} b The new amount of blue in the node (range 0 to 1).
+	@param  {number} a The new amount of alpha in the node (range 0 to 1).
+	@return {void} Nothing
+	*/
     this.setBorderColor = function(r, g, b, a) {
         this.plugin.setBorderColor(this.getId(), r, g, b, a);
     };
 }
 
+/**
+The class drawing a thickness adjustable line
+@class Line
+@augments Osmosis
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {number} x The x1 position of the line.
+@param  {number} y The y1 position of the line.
+@param  {number} width The x2 position of the line.
+@param  {number} height The y2 position of the line.
+@return {void} Nothing
+*/
 function Line(plugin, x, y, width, height) {
     // Initialize everything
     this.plugin = plugin;
@@ -894,11 +1733,27 @@ function Line(plugin, x, y, width, height) {
     this.init();
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 
-    this.setThickness = function(radius) {
-        this.plugin.setLineThickness(this.id, radius);
+	/**
+	Set the thicknes of the line.
+	@param  {number} thickness The line thickness in pixels.
+	@return {void} Nothing
+	*/
+    this.setThickness = function(thickness) {
+        this.plugin.setLineThickness(this.id, thickness);
     };
 }
 
+/**
+The class for an interactive scrollbar node
+@class ScrollBar
+@augments Osmosis
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {number} x The x position of the scrollbar.
+@param  {number} y The y position of the scrollbar.
+@param  {number} width The width of the scrollbar.
+@param  {number} height The height of the scrollbar.
+@return {void} Nothing
+*/
 function ScrollBar(plugin, x, y, width, height) {
     this.plugin = plugin;
     this.id = plugin.newScrollBar();
@@ -910,6 +1765,17 @@ function ScrollBar(plugin, x, y, width, height) {
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 }
 
+/**
+The class for an interactive drop down menu node
+@class DropDown
+@augments Osmosis
+@param  {object} passPlugin The monocleGL plugin object.
+@param  {number} x The x position of the drop down menu.
+@param  {number} y The y position of the drop down menu.
+@param  {number} width The width of the drop down menu.
+@param  {number} height The height of the drop down menu (Note this is the extended length, when retracted the drop down is 20 pixels).
+@return {void} Nothing
+*/
 function DropDown(plugin, x, y, width, height) {
     this.plugin = plugin;
     this.id = plugin.newDropDown();
@@ -922,11 +1788,20 @@ function DropDown(plugin, x, y, width, height) {
     this.bind("text_changed", { "obj" : this, "func" : "updateText" });
     this.plugin.positionIs(this.id, this.x, this.y, this.width, this.height);
 
+	/**
+	An automatically setup callback that triggers whenever the text changes.
+	@param  {string} text The string displayed in the textbox.
+	@return {void} Nothing
+	*/
 	this.updateText = function(text) {
-        logDebug("UPDATED: " + text);
         this.text = text;
     };
 
+	/**
+	Add an option to the drop down menu.
+	@param  {string} text The new option to be added to the menu.
+	@return {void} Nothing
+	*/
     this.addOption = function(option) {
         if(typeof option != "string") {
             //TODO: error
@@ -938,18 +1813,40 @@ function DropDown(plugin, x, y, width, height) {
         this.plugin.addOptionToDropDown(this.id, option);
     };
 
+	/**
+	Add a callback to be triggered whenever this node changes it's selected option.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.addChangedCallback = function(obj, callback) {
         this.bind("drop_down_changed", { "obj" : obj, "func" : callback });
     };
 
+	/**
+	Removes the callback thats triggered whenever this node changes it's selected option.
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} func The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
     this.removeChangedCallback = function(obj, callback) {
         this.plugin.removeDropDownCallback(this.getId(), obj, callback);
     };
 
+	/**
+	Removes all the callbacks on this node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
     this.removeAllCallbacks = function() {
         this.plugin.removeAllDropDownCallbacks(this.getId());
     };
 
+	/**
+	Sets the default option for the drop down menu.
+	@param  {string} option The prexisting option that the drop down menu defaults too.
+	@return {void} Nothing
+	*/
     this.setDefaultOption = function(option) {
         if(typeof option != "string") {
             return;
@@ -957,29 +1854,66 @@ function DropDown(plugin, x, y, width, height) {
         this.plugin.setDefaultDropDownOption(this.getId(), option);
     };
 
+	/**
+	Return the text value of the drop down menu
+	@param  {void} Nothing
+	@return {string} The string current inside the drop down menu
+	*/
     this.getText = function() {
         return this.text;
     };
 
+	/**
+	Sets the text value of the drop down menu
+	@param  {string} The string current inside the drop down menu
+	@return {void} Nothing
+	*/
     this.setText = function(text) {
         return this.plugin.setDropDownText(this.getId(), text);
     };
 
+	/**
+	Sets the background color of this node in openGL color format.
+	@param  {number} r The new amount of red in the node (range 0 to 1).
+	@param  {number} g The new amount of green in the node (range 0 to 1).
+	@param  {number} b The new amount of blue in the node (range 0 to 1).
+	@param  {number} a The new amount of alpha in the node (range 0 to 1).
+	@return {void} Nothing
+	*/
     this.setColor = function(r, g, b, a) {
         this.plugin.colorIs(this.getId(), r, g, b, a);
     };
 
+	/**
+	Sets the text caption color of this node in openGL color format.
+	@param  {number} r The new amount of red in the node (range 0 to 1).
+	@param  {number} g The new amount of green in the node (range 0 to 1).
+	@param  {number} b The new amount of blue in the node (range 0 to 1).
+	@param  {number} a The new amount of alpha in the node (range 0 to 1).
+	@return {void} Nothing
+	*/
     this.setTextColor = function(r, g, b, a) {
         this.plugin.setDropDownTextColor(this.getId(), r, g, b, a);
     };
 }
 
+/**
+The class drawing a thickness adjustable bezier line
+@class Bezier
+@augments Osmosis
+@param  {object} plugin The monocleGL plugin object.
+@param  {array} points Set the points of the Bezier (in a flat array) Example: var points = new Array(x1, y1, x2, y2, x3, y3, ...);
+@return {void} Nothing
+*/
 function Bezier(plugin, points) {
     this.plugin = plugin;
     this.id = plugin.newBezier();
 
-    // Set the points of the Bezier (in a flat array)
-    // Example: var points = new Array(x1, y1, x2, y2, x3, y3, ...);
+	/**
+	Change the points in the bezier curve to the ones passed in.
+	@param  {array} points Set the points of the Bezier (in a flat array) Example: var points = new Array(x1, y1, x2, y2, x3, y3, ...);
+	@return {void} Nothing
+	*/
     this.setPoints = function(points) {
         if(points.constructor.toString().indexOf("Array") != -1) { // Object is an array
             this.plugin.setBezierPoints(this.getId(), points);
@@ -989,6 +1923,11 @@ function Bezier(plugin, points) {
     };
     this.setPoints(points);
 
+	/**
+	Set the thicknes of the bezier line.
+	@param  {number} thickness The line thickness in pixels.
+	@return {void} Nothing
+	*/
     this.setThickness = function(thickness) {
         if(typeof thickness == "number") {
             this.plugin.setBezierThickness(thickness);
@@ -998,6 +1937,18 @@ function Bezier(plugin, points) {
     };
 }
 
+/**
+The class drawing toggable checkboxes
+@class Checkbox
+@augments Osmosis
+@param  {object} plugin The monocleGL plugin object.
+@param  {string} txt The string to be displayed in the checkbox.
+@param  {number} x The x position of the checkbox.
+@param  {number} y The y position of the checkbox.
+@param  {number} width The width of the checkbox.
+@param  {number} height The height of the checkbox.
+@return {void} Nothing
+*/
 function Checkbox(plugin, txt, x, y, width, height) {
     this.plugin = plugin;
 
@@ -1021,7 +1972,6 @@ function Checkbox(plugin, txt, x, y, width, height) {
    	this.id = this.lblBG.getId();
 
 	// Create the empty checkbox sprite
-	// TODO Remove the http:// when the plugin has the images internally
    	this.sprBox = new Sprite(this.plugin, "checkbox.png", this.x, this.y, this.height, this.height);
 
 	// Create the checkmark sprite and make invisible
@@ -1031,7 +1981,6 @@ function Checkbox(plugin, txt, x, y, width, height) {
 	// Figure out the y offset based on the height
 	var txtY = this.y;
 	if(this.height > 16) txtY = this.y - (this.height * this.height * 0.005);
-
 
 	// Create the label which display the checkbox's text
    	this.lblTxt = new Label(this.plugin, this.txt, this.height, this.x + (this.height * 0.8), txtY, this.width - this.height, this.height);
@@ -1043,30 +1992,50 @@ function Checkbox(plugin, txt, x, y, width, height) {
    	this.lblBG.addChild(this.sprCheck);
    	this.lblBG.addChild(this.lblTxt);
 
-	// if the user clicks on the check boxes toggle selected flag
+	/**
+	The callback that gets triggered whenever user clicks on the checkbox
+	@param  {number} x The x position of the mouse
+	@param  {number} y The y position of the mouse
+	@return {void} Nothing
+	*/
 	this.mouseClick = function(x,y) {
-		this.selected = !this.selected;
-		this.sprCheck.setVisibility(this.selected);
+		this.setSelected(!this.selected);
 	};
 
-	// Set the selected flag and checkmark visibility
+	/**
+	Set the selected flag and checkmark visibility.
+	@param  {boolean} bool If true then set the checkmark to be visible and set invisibile
+	@return {void} Nothing
+	*/
 	this.setSelected = function(bool) {
 		this.selected = bool;
 		this.sprCheck.setVisibility(this.selected);
 	};
 
-	// Get the selected flag
+	/**
+	Get the selected flag of the checkbox.
+	@param  {void} Nothing
+	@return {boolean} If true then checkbox is selected and will show false otherwise
+	*/
 	this.getSelected = function() {
 		return this.selected;
 	};
 
-	// Get text from the text label
+	/**
+	Get the text for checkbox.
+	@param  {void} Nothing
+	@return {string} The displayed text next to the checkbox
+	*/
     this.getText = function() {
     		this.txt = this.lblTxt.getText();
         return this.txt;
     };
 
-	// Set the text of the text label
+	/**
+	Set the text for checkbox.
+	@param  {string} The displayed text next to the checkbox
+	@return {void} Nothing
+	*/
     this.setText = function(text) {
   		this.txt = text;
         return this.lblTxt.setText(this.txt);
@@ -1074,6 +2043,19 @@ function Checkbox(plugin, txt, x, y, width, height) {
 }
 
 var arrRadioList = new Array();
+/**
+The class drawing toggable radio buttons.
+@class RadioButton
+@augments Osmosis
+@param  {object} plugin The monocleGL plugin object.
+@param  {string} txt The string to be displayed in the radio button.
+@param  {string} group The string use to group radio buttons together.
+@param  {number} x The x position of the radio button.
+@param  {number} y The y position of the radio button.
+@param  {number} width The width of the radio button.
+@param  {number} height The height of the radio button.
+@return {void} Nothing
+*/
 function RadioButton(plugin, txt, group, x, y, width, height) {
 	this.plugin = plugin;
 
@@ -1122,12 +2104,21 @@ function RadioButton(plugin, txt, group, x, y, width, height) {
    	this.lblBG.addChild(this.sprOn);
    	this.lblBG.addChild(this.lblTxt);
 
-	// if the user clicks on the check boxes toggle selected flag
+	/**
+	The callback that gets triggered whenever user clicks on the radio button.
+	@param  {number} x The x position of the mouse.
+	@param  {number} y The y position of the mouse.
+	@return {void} Nothing
+	*/
 	this.mouseClick = function(x,y) {
 		this.setSelected(true);
 	};
 
-	// Set the selected flag and checkmark visibility
+	/**
+	Set the selected flag and radio circle visibility.  This function will unselect any other radio buttons in the same group.
+	@param  {boolean} bool If true then set the radio circle to be visible and set invisibile.
+	@return {void} Nothing
+	*/
 	this.setSelected = function(bool) {
 		if(bool) {
 			for(var i = 0; i < arrRadioList.length; i++) {
@@ -1144,41 +2135,84 @@ function RadioButton(plugin, txt, group, x, y, width, height) {
 		this.sprOff.setVisibility(!this.selected);
 	};
 
-	// Get the selected flag
+	/**
+	Get the selected flag for this radio button.
+	@param  {void} Nothing
+	@return {boolean} If true then radio button is selected and will show false otherwise.
+	*/
 	this.getSelected = function() {
 		return this.selected;
 	};
 
-	// Get text from the text label
+	/**
+	Get the text for the radio button.
+	@param  {void} Nothing
+	@return {string} The displayed text next to the radio button.
+	*/
     this.getText = function() {
     		this.txt = this.lblTxt.getText();
         return this.txt;
     };
 
-	// Set the text of the text label
+	/**
+	Set the text for the radio button.
+	@param  {string} The displayed text next for the radio button.
+	@return {void} Nothing
+	*/
     this.setText = function(text) {
   		this.txt = text;
         return this.lblTxt.setText(this.txt);
     };
 }
 
-// ---------------------------------------------------------------------
-// Physics wrapper functions
+/**
+A wrapper class for accessing the physics object.
+@class Physics
+@param  {object} plugin The monocleGL plugin object.
+@return {void} Nothing
+*/
 function Physics(plugin) {
 	this.plugin = plugin;
 
+	/**
+	Set the enviromental varibles for this scene.
+	@param  {string} command The command to send to the plugin.
+	@return {void} Nothing
+	*/
 	this.setEnvironment = function(command) {
    		this.plugin.setEnvironment(command);
    	};
 
+	/**
+	Add physics properties to this node.
+	@param  {object} node The node to add physics too.
+	@param  {string} command The command to send to the plugin.
+	@return {void} Nothing
+	*/
    	this.addPhysics = function(node, command)  {
    		this.plugin.addPhysics(node.id, command);
    	};
 
+	/**
+	Creates a named invisible physics line.
+	@param  {string} name The name used for referencing the physics line.
+	@param  {number} x1 The x1 position of the segment.
+	@param  {number} y1 The y1 position of the segment.
+	@param  {number} x2 The x2 position of the segment.
+	@param  {number} y2 The y2 position of the segment.
+	@return {void} Nothing
+	*/
 	this.addSegment = function(name, x1, y1, x2, y2) {
    		this.plugin.addSegment(name, x1, y1, x2, y2);
    	};
 
+	/**
+	Add a joint constraint between the parent node and the child node.
+	@param  {object} parent The parent node to constrain with the child node.
+	@param  {object} child The child node to constrain with the parent node.
+	@param  {string} command The command to send to the plugin.
+	@return {void} Nothing
+	*/
    	this.addJoint = function(parent, child, command) {
 		if( parent === "NULL" && child === "NULL") {
 			return;
@@ -1191,6 +2225,14 @@ function Physics(plugin) {
    		}
    	};
 
+	/**
+	Add a callback to be trigger when two nodes collide
+	@param  {object} nodeA The node to trigger a callback when it collides with node B
+	@param  {object} nodeB The node to trigger a callback when node A collides with this node
+	@param  {object} obj The object for JavaScript to call the callback on
+	@param  {string} callback The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
    	this.addCollision = function(nodeA, nodeB, object, callback) {
         // Bind this callback
         nodeA.bind("physics_collision", { "node" : nodeB.id, "obj" : object, "func" : callback});
@@ -1200,18 +2242,43 @@ function Physics(plugin) {
    		this.plugin.addCollision(nodeA.id, nodeB.id);
    	};
 
+	/**
+	Applies a force and velocity to this node.
+	@param  {object} node The node to add a force or velocity too.
+	@param  {number} fX The new x-axis force to be applied to this node.
+	@param  {number} fY The new y-axis force to be applied to this node.
+	@param  {number} vX The new x-axis velocity to be applied to this node.
+	@param  {number} vY The new y-axis velocity to be applied to this node.
+	@return {void} Nothing
+	*/
    	this.applyForce = function(node, fX, fY, vX, vY) {
    		this.plugin.addSegment(node.id, fX, fY, vX, vY);
    	};
 
+	/**
+	Remove all physics properities from the passed node.
+	@param  {object} node The node to remove physics from.
+	@return {void} Nothing
+	*/
    	this.removePhysics = function(node) {
    		this.plugin.removePhysics(node.id);
    	};
 
+	/**
+	Removes a named invisible physic line
+	@param  {string} name The name of physics line(s) to remove
+	@return {void} Nothing
+	*/
 	this.removeSegment = function(name) {
    		this.plugin.removeSegment(name);
    	};
 
+	/**
+	Remove the joint constraint between the parent and child node.
+	@param  {object} parent The parent node to remove the constrain from.
+	@param  {object} child The child node to remove the constrain from.
+	@return {void} Nothing
+	*/
    	this.removeJoint = function(parent, child) {
    		if( parent === "NULL" && child === "NULL") {
 			return;
@@ -1224,50 +2291,104 @@ function Physics(plugin) {
    		}
    	};
 
+	/**
+	Remove the joint constraint between nodeA and nodeB.
+	@param  {object} nodeA The node pair to remove collision callback from
+	@param  {object} nodeB The node pair to remove collision callback from
+	@return {void} Nothing
+	*/
    	this.removeCollision = function(nodeA, nodeB) {
    		this.plugin.removeCollision(nodeA.id, nodeB.id);
    	};
 
+	/**
+	Remove all physics properities from everything.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
    	this.removeAllPhysics = function() {
    		this.plugin.removeAllPhysics();
    	};
 }
 
-// ---------------------------------------------------------------------
-// Tweener wrapper functions
+/**
+A wrapper class for accessing the tweener object.
+@class Tweener
+@param  {object} plugin The monocleGL plugin object.
+@return {void} Nothing
+*/
 function Tweener(plugin) {
 	this.plugin = plugin;
 
+	/**
+	Add a tween command to the node to change it's members over time.
+	@param  {object} node The node to add the tween to.
+	@param  {string} command The command to send to the plugin
+	@param  {object} obj (optional) The object for JavaScript to call the callback on
+	@param  {string} callback (optional) The name of the function to call when a callback occurs
+	@return {void} Nothing
+	*/
 	this.addTween = function(node, command, obj, callback) {
    		var tween_id = this.plugin.addTween(node.id, command);
         node.bind("tween_finished", { "tween_id" : tween_id, "obj" : obj, "func" : callback });
    	};
 
+	/**
+	Remove all the tweens for this node.  Any animations in mid action will stop.
+	@param  {object} node The node to remove tween from.
+	@return {void} Nothing
+	*/
    	this.removeTween = function(node) {
    		this.plugin.removeTween(node.id);
    	};
 
+	/**
+	Pause all the tweens for this node.
+	@param  {object} node The node to pause the current tweens.
+	@return {void} Nothing
+	*/
 	this.pauseTween = function(node) {
    		this.plugin.pauseTween(node.id);
    	};
 
+	/**
+	Resume all the tweens for this node.
+	@param  {object} node The node to resume the current tweens.
+	@return {void} Nothing
+	*/
    	this.resumeTween = function(node) {
    		this.plugin.resumeTween(node.id);
    	};
 
+	/**
+	Remove all the tweens from every node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
    	this.removeAllTweens = function() {
    		this.plugin.removeAllTweens();
    	};
 
+	/**
+	Pause all the tweens from every node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
 	this.pauseAllTweens = function() {
    		this.plugin.pauseAllTweens();
    	};
 
+	/**
+	Resume all the tweens from every node.
+	@param  {void} Nothing
+	@return {void} Nothing
+	*/
    	this.resumeAllTweens = function() {
    		this.plugin.resumeAllTweens();
    	};
 }
 
+// Setup class protoypes
 BaseSprite.prototype = new Osmosis();
 Sprite.prototype = new BaseSprite();
 BaseLabel.prototype = new Osmosis();
@@ -1283,1004 +2404,224 @@ Bezier.prototype = new Osmosis();
 Checkbox.prototype = new Osmosis();
 RadioButton.prototype = new Osmosis();
 Line.prototype = new Osmosis();
-function bar_graph(plugin, scene,x, y, width, height,startingX,endingX,startingY,endingY)
-{
-    this.plugin = plugin;
-    this.scene = scene;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.points = [];
-    this.startingX = startingX;
-    this.endingX = endingX;
-    this.startingY = startingY;
-    this.endingY = endingY;
-    this.rectangles = [];
-    this.bottomLine;
-    this.leftLine;
-    this.labels = new Array();
-    this.visible = true;
-    this.layer = new Layer(this.plugin,0, 0,480,320);
-    this.scene.bgLayer.addChild(this.layer);
-    this.layer.setColor(1,1,1,0);
-      this.build = function()
-      {
-           this.buildAxis();
-           this.plot();
-      };
-
-      this.buildAxis = function()
-      {
-          this.bottomLine = new Primitive(this.plugin,"line");
-          this.bottomLine.setPoints(x,y,x+width,y);
-          this.leftLine = new Primitive(this.plugin,"line");
-          this.leftLine.setPoints(x,y,x,y+height);
-          this.scene.bgLayer.addChild(this.bottomLine);
-          this.scene.bgLayer.addChild(this.leftLine);
-      };
-
-      this.setLabels = function(hlabels, hunit, hdimension,vlabels,vunit,vdimension)
-      {
-      		var label;
-            for(var i = 0; i < hlabels.length; i++)
-            {
-                 if(hlabels.length == 1) {
-                     label = new Label (this.plugin, hlabels[i], 1, this.x+ hunit*(i+1), this.y-hdimension[1], hdimension[0], hdimension[1]);
-                 } else {
-                     label = new Label (this.plugin, hlabels[i], 1, this.x+ hunit*i, this.y-hdimension[1], hdimension[0], hdimension[1]);
-                 }
-
-                 label.setColor(1,1,0,0);
-                 label.setCaptionColor(0,0,0,1);
-                 this.scene.bgLayer.addChild(label);
-                 this.labels.push(label);
-            }
-
-            for(var j = 0; j < vlabels.length; j++)
-            {
-                 label = new Label (this.plugin, vlabels[j], 1, this.x - vdimension[0], this.y+ vunit*j, vdimension[0], vdimension[1]);
-                 label.setColor(1,1,0,0);
-                 label.setCaptionColor(0,0,0,1);
-                 this.scene.bgLayer.addChild(label);
-                 this.labels.push(label);
-            }
-      };
-
-      this.add = function(localX,localY) {
-          var stageX = this.x + this.width/(this.endingX - this.startingX)*(localX- this.startingX);
-          var stageY = this.y + this.height/(this.endingY - this.startingY)*(localY - this.startingY);
-          this.points.push([stageX,stageY]);
-      };
-
-      this.update = function(index,localX,localY) {
-          var stageX = this.x + this.width/(this.endingX - this.startingX)*(localX- this.startingX);
-          var stageY = this.y + this.height/(this.endingY - this.startingY)*(localY - this.startingY);
-          this.points[index][0] = stageX;
-          this.points[index][1] = stageY;
-      };
-
-      this.plot = function() {
-          this.rectangles = new Array();
-          this.rectangles = [];
-
-          if(this.points.length === 0)
-          return;
-
-          for(var i = 0; i < this.points.length; i++)
-          {
-               var halfwidth = width/(this.endingX - this.startingX)*1/3;
-               var rectangle = new Layer(this.plugin,this.points[i][0]-halfwidth, this.y , halfwidth*2,this.points[i][1] - this.y);
-               this.rectangles.push(rectangle);
-          }
-
-          for(i = 0; i < this.rectangles.length; i++)
-          {
-              //this.scene.bgLayer.addChild(this.rectangles[i]);
-              this.layer.addChild(this.rectangles[i]);
-          }
-      };
-
-
-      this.clear = function()
-      {
-          for(var i = 0; i < this.rectangles.length; i++) {
-              //this.scene.bgLayer.removeChild(this.rectangles[i]);
-              this.layer.removeChild(this.rectangles[i]);
-          }
-      };
-
-      this.setVisible = function(flag)
-      {
-           var i = 0;
-           var j = 0;
-
-           if(!flag) {
-               this.bottomLine.setVisibility(false);
-               this.leftLine.setVisibility(false);
-
-               for(i = 0; i <this.labels.length; i++) {
-                   this.labels[i].setVisibility(false);
-               }
-               for(j = 0; j < this.rectangles.length; j++) {
-                  // this.scene.bgLayer.removeChild(this.rectangles[j]);
-                  this.layer.removeChild(this.rectangles[j]);
-               }
-               this.visible = false;
-           } else {
-               this.bottomLine.setVisibility(true);
-               this.leftLine.setVisibility(true);
-
-               for(i = 0; i <this.labels.length; i++) {
-                   this.labels[i].setVisibility(true);
-               }
-               for(j = 0; j < this.rectangles.length; j++) {
-                  // this.scene.bgLayer.addChild(this.rectangles[j]);
-                  this.layer.removeChild(this.rectangles[j]);
-               }
-               this.visible = true;
-           }
-      };
-}
-function circleVector(passRadial, passTheta)
-
-{
-
-    this.radial=passRadial;
-
-	this.theta=passTheta;
-
-
-
-	this.setVector = function(passRadial, passTheta)
-
-	{
-
-		this.radial = passRadial;
-
-		this.theta = passTheta;
-
-		this.checkAngles();
-
-	};
-
-
-
-	this.clone = function()
-
-	{
-
-		var ret= new circleVector();
-
-
-
-		ret.setVector(this.radial, this.theta);
-
-
-
-		return ret;
-
-	};
-
-
-
-	this.addTheta = function(passTheta)
-
-	{
-
-		this.theta += passTheta;
-
-		this.checkAngles();
-
-	};
-
-
-
-	this.checkAngles = function()
-
-	{
-
-		while(this.theta < 0 || this.theta >= 360)
-
-		{
-
-			if(this.theta < 0) this.theta += 360;
-
-			if(this.theta >= 360) this.theta -= 360;
-
-		}
-
-	};
-
-
-
-	this.getPolar = function(startPoint, endPoint)
-
-	{
-
-		var ret= -1;
-
-		var x = startPoint.x - endPoint.x;
-
-		var y = (320- startPoint.y) - (320 - endPoint.y);
-
-
-
-		// Get length
-
-		radial = distancePoints(startPoint,endPoint);
-
-
-
-		// do special cases first of 0, 90, 180, 270 angles
-
-		if (startPoint.x == endPoint.x && startPoint.y == endPoint.y) ret = 0;
-
-
-
-		if (startPoint.x == endPoint.x && startPoint.y < endPoint.y)  ret = 90;
-
-		if (startPoint.x == endPoint.x && startPoint.y > endPoint.y)  ret = 270;
-
-
-
-		if (startPoint.y == endPoint.y && startPoint.x > endPoint.x)  ret = 180;
-
-		if (startPoint.y == endPoint.y && startPoint.x < endPoint.x)  ret = 0;
-
-
-
-		// Check if we already have answer
-
-		if(ret != -1)
-
-		{
-
-			this.theta = ret;
-
-			return ret;
-
-		}
-
-
-
-		// test which side we are on
-
-		if(x < 0  && y < 0)
-
-			ret = Math.atan(y/x) * (180 / Math.PI);
-
-		else if (x < 0 && y > 0)
-
-			ret = 360 + Math.atan(y/x) * (180 / Math.PI);
-
-		else
-
-			ret = 180 + (Math.atan(y/x) * (180 / Math.PI));
-
-
-
-		this.theta = ret;
-
-		return ret;
-
-	};
-
-
-
-	if(passRadial===undefined) {
-
-		passRadial=0;
-
-	}
-
-	if(passTheta===undefined) {
-
-		passTheta=0;
-
-	}
-
-
-
-	this.setVector(passRadial, passTheta);
-
-}
-
-/*
-*	line_graph.js : line graph Library for the THP.
-*
-*	Author: Ryan
-*	Date: July 28 '10
-*	About:  This library allows for creation of line graph based on points user puts in.
-*			This library requires Osmosis and THP_Template to function.
-*/
-
-function line_graph(plugin, scene ,x, y, width, height,startingX,endingX,startingY,endingY)
-{
-      this.plugin = plugin;
-      this.x = x;
-      this.y = y;
-      this.width = width;
-      this.height = height;
-      this.scene = scene;
-      this.points = [];
-      this.lines = [];
-      this.startingX = startingX;
-      this.endingX = endingX;
-      this.startingY = startingY;
-      this.endingY = endingY;
-      this.dots = new Array();
-      //build the graph
-      this.build = function()
-      {
-           this.buildAxis();
-           this.plot();
-      };
-
-      //programmably draws the axis
-      this.buildAxis = function()
-      {
-          var bottomLine = new Primitive(this.plugin,"line");
-          bottomLine.setPoints(x,y,x+width,y);
-          var leftLine = new Primitive(this.plugin,"line");
-          leftLine.setPoints(x,y,x,y+height);
-          this.scene.addChild(bottomLine);
-          this.scene.addChild(leftLine);
-      };
-
-      //add point to points array
-      this.add = function(localX,localY)
-      {
-          var stageX = this.x + this.width/(this.endingX - this.startingX)*(localX- this.startingX);
-          var stageY = this.y + this.height/(this.endingY - this.startingY)*(localY - this.startingY);
-          var dot = new Layer(this.plugin,stageX,stageY,5,5);
-          this.points.push([stageX,stageY]);
-          this.scene.addChild(dot);
-          this.dots.push(dot);
-      };
-
-      //connect the points added to points array
-      this.plot = function()
-      {
-          this.lines = new Array();
-          this.lines = [];
-
-          if(this.points.length === 0)
-          return;
-
-          for(var i = 0; i < this.points.length; i++)
-          {
-               var line = new Primitive(this.plugin,"line");
-
-               if( i === this.points.length -1) {
-                   break;
-               }
-
-               line.setPoints(this.points[i][0],this.points[i][1],this.points[i+1][0],this.points[i+1][1]);
-               this.lines.push(line);
-
-          }
-
-          for(i = 0; i < this.lines.length; i++)
-          {
-              this.scene.addChild(this.lines[i]);
-          }
-
-          /*for(var i = 0; i < this.dots.length; i++)
-          {
-              this.scene.addChild(this.dots[i]);
-          }*/
-
-      };
-
-      this.clearDots = function()
-      {
-          for(var i = 0; i < this.dots.length; i++)
-          {
-              this.scene.removeChild(this.dots[i]);
-          }
-          this.dots = new Array();
-          this.points = new Array();
-      };
-
-      this.clear = function()
-      {
-          for(var i = 0; i < this.lines.length; i++)
-          {
-              this.scene.removeChild(this.lines[i]);
-          }
-          this.lines = new Array();
-
-      };
-
-      //update point
-      this.update = function(index,localX,localY)
-      {
-            var stageX = this.x + this.width/(this.endingX - this.startingX)*(localX- this.startingX);
-            var stageY = this.y + this.height/(this.endingY - this.startingY)*(localY - this.startingY);
-            this.points[index][0] = stageX;
-            this.points[index][1] = stageY;
-            this.scene.removeChild(this.dots[index]);
-            this.dots[index] = new Layer(this.plugin,stageX,stageY,5,5);
-            this.scene.addChild(this.dots[index]);
-      };
-
-      //set axis labels
-      this.setLabels = function(hlabels, hunit, hdimension,vlabels,vunit,vdimension)
-      {
-			var label;
-            for(var i = 0; i < hlabels.length; i++)
-            {
-                 label = new Label (this.plugin, hlabels[i], 1, this.x+ hunit*i, this.y-hdimension[1], hdimension[0], hdimension[1]);
-                 label.setColor(1,1,0,0);
-                 label.setCaptionColor(0,0,0,1);
-                 this.scene.addChild(label);
-            }
-
-            for(var j = 0; j < vlabels.length; j++)
-            {
-                 label = new Label (this.plugin, vlabels[j], 1, this.x - vdimension[0], this.y+ vunit*j, vdimension[0], vdimension[1]);
-                 label.setColor(1,1,0,0);
-                 label.setCaptionColor(0,0,0,1);
-                 this.scene.addChild(label);
-            }
-      };
-
-      //gives the option to import axis image
-      this.importAxis = function(url)
-      {
-           var sprite = new Sprite();
-           this.scene.addChild(label);
-      };
-}
-
-//line_graph.prototype = new Osmosis();
-
-
-
+/*! THM_point.js */
 // ---------------------------------------------------------------------
-
-// The mouse object
-
+// A two dimensional point class for MGL
 // Author: Ethan Greavette
-
-// Date: 7/15/2010
-
-// Comments:  Handles it's own event and updates its members based on
-
-//			  safe javascript events.
-
-// ---------------------------------------------------------------------
-
-
-
-// ---------------------------------------------------------------------
-
-// Mouser capture mouse events and records them in a easy to find spot
-
-function Mouser( plugin ) {
-
-
-
-	this.p = plugin;
-
-	this.funcCallback = function() {};
-
-
-
-	// Mouser members
-
-	this.mouseX = 0;
-
-	this.mouseY = 0;
-
-	this.boolMouse = false;
-
-	this.boolOnPlugin = false;
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Sets the funcCallback function for updating
-
-	this.setCallback = function( passCallback ) {
-
-		this.funcCallback = passCallback;
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the pMouseMove event
-
-	this.pMouseMove= function( x, y ) {
-
-		this.mouseX = x;
-
-		this.mouseY = y;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the pMouseDown event
-
-	this.pMouseDown = function( x, y ) {
-
-		this.boolMouse = true;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the pMouseUp event
-
-	this.pMouseUp = function( x, y ) {
-
-		this.boolMouse = false;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the onMouseDown event
-
-	this.mouseDown = function( event ) {
-
-		if(typeof this.p.captionIs === "undefined") {
-
-			logDebug("Mouse down global call (you shouldn't see this)");
-
-			return;
-
-		}
-
-		this.boolMouse = true;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the onMouseUp event
-
-	this.mouseUp = function(event) {
-
-		if(typeof this.p.captionIs === "undefined") {
-
-			logDebug("Mouse up global call (you shouldn't see this)");
-
-			return;
-
-		}
-
-		this.boolMouse = false;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the mouseOver event
-
-	this.mouseOver = function(event) {
-
-		this.boolOnPlugin = true;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// ---------------------------------------------------------------------
-
-	// Capture the mouseOut event
-
-	this.mouseOut = function(event) {
-
-		this.boolOnPlugin = false;
-
-		if(typeof this.funcCallback !== "undefined"){ this.funcCallback();}
-
-	};
-
-
-
-	// Setup event listeners on the document
-
-	var thisObject = this;
-
-	//document.onmousedown = function(){thisObject.mouseDown();};
-
-	//document.onmouseup = function(){thisObject.mouseUp();};
-
-	//this.p.onmouseover = function(){thisObject.mouseOver();};
-
-	//this.p.onmouseout = function(){thisObject.mouseOut();};
-
-
-
-	// Set up mouse layer.
-
-    this.mouseSprite = new Sprite(this.p, "", 0, 0, this.p.width, this.p.height);
-
-    //this.mouseSprite.setVisibility(false);
-
-    //this.mouseSprite.downCallback(this, "pMouseDown");
-
-	//this.mouseSprite.upCallback(this, "pMouseUp");
-
-	//this.mouseSprite.moveCallback(this, "pMouseMove");
-
-	//this.mouseSprite.subscribe();
-
-}
-
-// ---------------------------------------------------------------------
-
-// multidim_array.js
-
-// Date: 7/15/2010
-
-// Comments: This appends some useful funcstions on Array
-
-// Source: The two functions were taken from the book titled
-
-//			 "JavaScript - The Good Parts, Chapter 6.7"
-
-// ---------------------------------------------------------------------
-
-
-
-// ---------------------------------------------------------------------
-
-// Tests if an object is an array and returns true if it is
-
-var is_array = function (value) {
-
-    return value &&
-
-        typeof value === 'object' &&
-
-        typeof value.length === 'number' &&
-
-        typeof value.splice === 'function' &&
-
-        !(value.propertyIsEnumerable('length'));
-
-};
-
-
-
-// ---------------------------------------------------------------------
-
-// Fill an array with initial
-
-Array.dim = function (dimension, initial) {
-
-    var a = [], i;
-
-    for (i = 0; i < dimension; i += 1) {
-
-        a[i] = initial;
-
-    }
-
-    return a;
-
-};
-
-
-
-// ---------------------------------------------------------------------
-
-// Create a matrix and fill it with the initial value
-
-Array.matrix = function (m, n, initial) {
-
-    var a, i, j, mat = [];
-
-    for (i = 0; i < m; i += 1) {
-
-        a = [];
-
-        for (j = 0; j < n; j += 1) {
-
-            a[j] = initial;
-
-        }
-
-        mat[i] = a;
-
-    }
-
-    return mat;
-
-};
-
-
-
-// ---------------------------------------------------------------------
-
-// point.js
-
-// Author: Ethan Greavette
-
 // Date: 7/07/2010
-
-// Comments: Contain a x,y point location
-
+// Comments: Contains a x,y point location
 // ---------------------------------------------------------------------
 
-
-
-// ---------------------------------------------------------------------
-
-// Point: The main object of the plugin
-
+/**
+A class for representing a two dimensional point.
+@class Point
+@param  {number} passX The x position of the point
+@param  {number} passY The y position of the point
+@return {void} Nothing
+*/
 function Point(passX, passY)
-
 {
-
 	// Optional parameter x, y default to 0
-
 	if ( passX === undefined ) { this.x = 0; } else { this.x = passX; }
-
 	if ( passY === undefined ) { this.y = 0; } else { this.y = passY; }
 
-
-
-	//This function checks if another point is equal to "this" one.
-
-	this.equals = function(comparedPoint)
-
-	{
-
-		this.comparedPoint=comparedPoint;
-
-
-
-		if(this.y===this.comparedPoint.y && this.x===this.comparedPoint.x)
-
-		{
-
+	/**
+	This function checks if another point is equal to "this" one.
+	@param  {object} comparedPoint The point to compare "this" point to.
+	@return {boolean} True if this point equals the passed in point and false otherwise.
+	*/
+	this.equals = function(comparedPoint) {
+		if(this.y === comparedPoint.y && this.x === comparedPoint.x) {
 			return true;
-
-		}
-
-		else
-
-		{
-
+		} else {
 			return false;
-
 		}
-
 	};
 
-	this.clone = function()
-
-	{
-
-		var tempX = this.x;
-
-		var tempY = this.y;
-
+	/**
+	Create a copy of this point and return it.
+	@param {void} Nothing.
+	@return {object} Returns a new copy of this point.
+	*/
+	this.clone = function() {
 		var tempPoint = new Point(this.x,this.y);
-
-
-
 		return tempPoint;
-
 	};
 
-	this.normalize = function()
-
-	{
-
+	/**
+	Normalizes this point to be in between 0-1.
+	@param {void} Nothing.
+	@return {void} Nothing.
+	*/
+	this.normalize = function() {
 		var length = Math.sqrt ( this.x*this.x + this.y*this.y );
-
 		this.x=this.x/length;
-
 		this.y=this.y/length;
-
 	};
 
-	this.offset = function(pass_dx,pass_dy)
-
-	{
-
+	/**
+	Offset this point by the passed in numbers
+	@param  {number} passX The new x position to offset this point by.
+	@param  {number} passY The new y position to offset this point by.
+	@return {void} Nothing
+	*/
+	this.offset = function(pass_dx,pass_dy)	{
 		var dx;
-
 		var dy;
-
 		if ( pass_dx === undefined ) { dx = 0; } else { dx = pass_dx; }
-
 		if ( pass_dy === undefined ) { dy = 0; } else { dy = pass_dy; }
-
 		this.x+=dx;
-
 		this.y+=dy;
-
 	};
 
-	this.toString = function()
-
-	{
-
-		var pointString =("(x=" + this.x + ", y=" + this.y + ")");
-
-		return pointString;
-
+	/**
+	Return a string containing the x and y positions
+	@param {void} Nothing.
+	@return {string} The x and y positions in a formatted string
+	*/
+	this.toString = function() {
+		return "(x=" + this.x + ", y=" + this.y + ")";
 	};
-
 }
 
-function interpolatePoints(point1,point2,f)
-
+/**
+Create a new point inbetween the two points passed in and the ratio of the new point.
+@class interpolatePoints
+@param  {object} point1 The frist point to interpolate inbetween.
+@param  {object} point2 The second point to interpolate inbetween.
+@param	{number} f The ratio between (0-1) with 0 being point2 and 1 being point1.
+@return {object} The new interpolated point.
+*/
+function interpolatePoints(point1, point2, f)
 {
+	var interpolatedPoint = new Point();
+	var deltaX = point2.x - point1.x;
+	var deltaY = point2.y - point1.y;
 
-	var interpolatedPoint=new Point();
-
-	var deltaX= point2.x-point1.x;
-
-	var deltaY= point2.y-point1.y;
-
-
-
-	interpolatedPoint.x=point2.x-deltaX*f;
-
-	interpolatedPoint.y=point2.y-deltaY*f;
-
-
+	interpolatedPoint.x = point2.x - deltaX * f;
+	interpolatedPoint.y = point2.y - deltaY * f;
 
 	return interpolatedPoint;
-
 }
 
-
-
-function distancePoints(point1,point2)
-
+/**
+Measures the distance inbetween the two points passed in.
+@class distancePoints
+@param  {object} point1 The frist point to measure from.
+@param  {object} point2 The second point to measure to.
+@return {number} The distance inbetween the two passed in points.
+*/
+function distancePoints(point1, point2)
 {
+	var distance;
+	var deltaX = point2.x - point1.x;
+	var deltaY = point2.y - point1.y;
 
-	var thisDistance;
-
-	var deltaX=point2.x-point1.x;
-
-	var deltaY=point2.y-point1.y;
-
-
-
-	thisDistance=Math.sqrt(Math.pow(deltaX,2)+Math.pow(deltaY,2));
-
-	return thisDistance;
-
-}
-
+	distance = Math.sqrt((deltaX*deltaX)+(deltaY*deltaY));
+	return distance;
+}/*! THM_publisher_light.js */
+// ---------------------------------------------------------------------
+// The comunication layer between the demo and our server
+// Author: Ethan Greavette
+// Date: 7/07/2010
+// Comments: This is a "lite" version of the publisher used on our website.
+// ---------------------------------------------------------------------
 
 
+/*
+Math.uuid.js (v1.4)
+http://www.broofa.com
+mailto:robert@broofa.com
 
+Copyright (c) 2010 Robert Kieffer
+Dual licensed under the MIT and GPL licenses.
+*/
+
+/*
+ * Generate a random uuid.
+ *
+ * USAGE: Math.uuid(length, radix)
+ *   length - the desired number of characters
+ *   radix  - the number of allowable values for each character.
+ *
+ * EXAMPLES:
+ *   // No arguments  - returns RFC4122, version 4 ID
+ *   >>> Math.uuid()
+ *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
+ *
+ *   // One argument - returns ID of the specified length
+ *   >>> Math.uuid(15)     // 15 character ID (default base=62)
+ *   "VcydxgltxrVZSTV"
+ *
+ *   // Two arguments - returns ID of the specified length, and radix. (Radix must be <= 62)
+ *   >>> Math.uuid(8, 2)  // 8 character ID (base=2)
+ *   "01001010"
+ *   >>> Math.uuid(8, 10) // 8 character ID (base=10)
+ *   "47473046"
+ *   >>> Math.uuid(8, 16) // 8 character ID (base=16)
+ *   "098F4D35"
+ */
+(function() {
+  // Private array of chars to use
+  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+
+  Math.uuid = function (len, radix) {
+	var chars = CHARS, uuid = [];
+	radix = radix || chars.length;
+
+	if (len) {
+	  // Compact form
+	  for (var i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
+	} else {
+	  // rfc4122, version 4 form
+	  var r;
+
+	  // rfc4122 requires these characters
+	  uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+	  uuid[14] = '4';
+
+	  // Fill in random data.  At i==19 set the high bits of clock sequence as
+	  // per rfc4122, sec. 4.1.5
+	  for (i = 0; i < 36; i++) {
+		if (!uuid[i]) {
+		  r = 0 | Math.random()*16;
+		  uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+		}
+	  }
+	}
+
+	return uuid.join('');
+  };
+
+  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
+  // by minimizing calls to random()
+  Math.uuidFast = function() {
+	var chars = CHARS, uuid = new Array(36), rnd=0, r;
+	for (var i = 0; i < 36; i++) {
+	  if (i==8 || i==13 ||  i==18 || i==23) {
+		uuid[i] = '-';
+	  } else if (i==14) {
+		uuid[i] = '4';
+	  } else {
+		if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
+		r = rnd & 0xf;
+		rnd = rnd >> 4;
+		uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+	  }
+	}
+	return uuid.join('');
+  };
+
+  // A more compact, but less performant, RFC4122v4 solution:
+  Math.uuidCompact = function() {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+	  var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+	  return v.toString(16);
+	}).toUpperCase();
+  };
+})();
 
 // If no jQuery then don't load server code
-/*****************
-	math.uuid
-	****************/
-	/*!
-	Math.uuid.js (v1.4)
-	http://www.broofa.com
-	mailto:robert@broofa.com
-
-	Copyright (c) 2010 Robert Kieffer
-	Dual licensed under the MIT and GPL licenses.
-	*/
-
-	/*
-	 * Generate a random uuid.
-	 *
-	 * USAGE: Math.uuid(length, radix)
-	 *   length - the desired number of characters
-	 *   radix  - the number of allowable values for each character.
-	 *
-	 * EXAMPLES:
-	 *   // No arguments  - returns RFC4122, version 4 ID
-	 *   >>> Math.uuid()
-	 *   "92329D39-6F5C-4520-ABFC-AAB64544E172"
-	 *
-	 *   // One argument - returns ID of the specified length
-	 *   >>> Math.uuid(15)     // 15 character ID (default base=62)
-	 *   "VcydxgltxrVZSTV"
-	 *
-	 *   // Two arguments - returns ID of the specified length, and radix. (Radix must be <= 62)
-	 *   >>> Math.uuid(8, 2)  // 8 character ID (base=2)
-	 *   "01001010"
-	 *   >>> Math.uuid(8, 10) // 8 character ID (base=10)
-	 *   "47473046"
-	 *   >>> Math.uuid(8, 16) // 8 character ID (base=16)
-	 *   "098F4D35"
-	 */
-	(function() {
-	  // Private array of chars to use
-	  var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-
-	  Math.uuid = function (len, radix) {
-	    var chars = CHARS, uuid = [];
-	    radix = radix || chars.length;
-
-	    if (len) {
-	      // Compact form
-	      for (var i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix];
-	    } else {
-	      // rfc4122, version 4 form
-	      var r;
-
-	      // rfc4122 requires these characters
-	      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-	      uuid[14] = '4';
-
-	      // Fill in random data.  At i==19 set the high bits of clock sequence as
-	      // per rfc4122, sec. 4.1.5
-	      for (i = 0; i < 36; i++) {
-	        if (!uuid[i]) {
-	          r = 0 | Math.random()*16;
-	          uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-	        }
-	      }
-	    }
-
-	    return uuid.join('');
-	  };
-
-	  // A more performant, but slightly bulkier, RFC4122v4 solution.  We boost performance
-	  // by minimizing calls to random()
-	  Math.uuidFast = function() {
-	    var chars = CHARS, uuid = new Array(36), rnd=0, r;
-	    for (var i = 0; i < 36; i++) {
-	      if (i==8 || i==13 ||  i==18 || i==23) {
-	        uuid[i] = '-';
-	      } else if (i==14) {
-	        uuid[i] = '4';
-	      } else {
-	        if (rnd <= 0x02) rnd = 0x2000000 + (Math.random()*0x1000000)|0;
-	        r = rnd & 0xf;
-	        rnd = rnd >> 4;
-	        uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
-	      }
-	    }
-	    return uuid.join('');
-	  };
-
-	  // A more compact, but less performant, RFC4122v4 solution:
-	  Math.uuidCompact = function() {
-	    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-	      var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-	      return v.toString(16);
-	    }).toUpperCase();
-	  };
-	})();
-
 if(typeof jQuery !== "undefined") {
 	/*************************
 	jquery-json
@@ -2318,9 +2659,15 @@ if(typeof jQuery !== "undefined") {
 	{var c=_meta[a];if(typeof c==='string')return c;c=a.charCodeAt();return'\\u00'+Math.floor(c/16).toString(16)+(c%16).toString(16);})+'"';}
 	return'"'+string+'"';};var _escapeable=/["\\\x00-\x1f\x7f-\x9f]/g;var _meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'};})(jQuery);
 
-	/****************************
-	JS Demo submission
-	****************************/
+	/**
+	An ajax push for when a demo questions is answered
+	@class submit_demo_quiz_answer
+	@param  {string} demo_name The name of this demo
+	@param  {string} quiz_name The name of the question in this demo being answered
+	@param  {boolean} is_correct True if the answer was correct and false otherwise
+	@param  {object} callback The function to call on success
+	@return {void} Nothing
+	*/
 	function submit_demo_quiz_answer(demo_name, quiz_name, is_correct, callback) {
 	    var uuid = Math.uuid();
 	    var timestamp = timestamp = (new Date()).getTime()/1000.0;
@@ -2345,6 +2692,15 @@ if(typeof jQuery !== "undefined") {
 	        "success": callback
     	});
 	}
+
+	/**
+	An ajax push the register new questions.
+	@class submit_demo_quiz_answer
+	@param  {string} demo_name The name of this demo.
+	@param  {number} number_of_questions The total number of quizzes in this demo.
+	@param  {array} quiz_names The array of all the question names in this demo.
+	@return {boolean} Returns true if user has teacher role and false otherwise.
+	*/
 	function register_questions(demo_name, number_of_questions, question_names){
         if( typeof window.site_data !== "undefined" ) {
         		if( window.site_data.settings.THM_USER_ROLE  != "teacher" ) { return false; }
@@ -2373,1759 +2729,96 @@ if(typeof jQuery !== "undefined") {
 		return true;
 	}
 }
+/*! THM_rectangle.js */
 // ---------------------------------------------------------------------
-
-// rectangle.js
-
+// A two dimensional rectangle class for MGL
 // Author: Ethan Greavette
-
 // Date: 7/07/2010
-
 // Comments: Contain a x, y, width and height box
-
 // ---------------------------------------------------------------------
 
-
-
-// ---------------------------------------------------------------------
-
-// Rectangle: The main object of the plugin
-
+/**
+A class for representing a two dimensional rectangle.
+@class Rectangle
+@param  {number} passX The x position of the rectangle.
+@param  {number} passY The y position of the rectangle.
+@param  {number} passW The width of the rectangle.
+@param  {number} passH The height of the rectangle.
+@return {void} Nothing
+*/
 function Rectangle(passX, passY, passW, passH) {
 
-
-
 	// Optional parameter default to default to 0
-
 	if ( passX === undefined ) { this.x = 0; } else {this.x = passX;}
-
 	if ( passY === undefined ) { this.y = 0; } else {this.y = passY;}
-
 	if ( passW === undefined ) { this.width = 0; } else {this.width = passW;}
-
 	if ( passH === undefined ) { this.height = 0; } else {this.height = passH;}
 
-
-
-	// Check if rectangles intersect. Return true or false
-
-	this.intersects = function(Rectangle)
-
-	{
-
-	    if( ((this.x + this.width) < Rectangle.x) || ((Rectangle.x + Rectangle.width) < this.x) || ((this.y + this.height) < Rectangle.y) || ((Rectangle.y + Rectangle.height) < this.y)) {
-
+	/**
+	Checks if two rectangles intersect.
+	@param  {object} passRect The rectangle to test against this rectangle.
+	@return {boolean} Return true if the rectangles intersect or false otherwise.
+	*/
+	this.intersects = function(passRect) {
+	    if( ((this.x + this.width) < passRect.x) || ((passRect.x + passRect.width) < this.x) || ((this.y + this.height) < passRect.y) || ((passRect.y + passRect.height) < this.y)) {
 		   return false;
-
 		} else {
-
 		   return true;
-
 		}
-
 	};
 
-	this.containsPoint = function(passPoint)
-
-	{
-
-		var containerPoint = passPoint;
-
-
-
+	/**
+	Checks if this rectangle contains the passed in point
+	@param  {object} passPoint The point to test against this rectangle.
+	@return {boolean} Return true if the rectangle contains the passed point or false otherwise.
+	*/
+	this.containsPoint = function(passPoint) {
 		if(passPoint.x >= this.x && passPoint.x <= (this.x + this.width) && passPoint.y >= this.y && passPoint.y <= (this.y + this.height)) {
-
 			return true;
-
 		} else {
-
 			return false;
-
 		}
-
 	};
 
-	this.containsRect = function(passRect)
-
-	{
-
+	/**
+	Checks if this rectangle contains the passed in rectangle completely.
+	@param  {object} passRect The rectangle to test against this rectangle.
+	@return {boolean} Return true if the rectangle contains the passed rectangle or false otherwise.
+	*/
+	this.containsRect = function(passRect) {
 		var testRect = passRect;
-
 		var point1 = new Array();
-
 		var point2 = new Array();
-
 		var counter = 0;
 
 		point1.push(new Point(this.x,this.y));
-
 		point1.push(new Point(this.x+this.width,this.y+this.height));
 
-
-
 		point2.push(new Point(passRect.x,passRect.y));
-
 		point2.push(new Point(passRect.x+passRect.width,passRect.y+passRect.height));
 
-
-
-		for(var i = 0 ; i < point2.length ; i++)
-
-		{
-
-			if(point2[i].x >= point1[0].x && point2[i].x <= point1[1].x && point2[i].y >= point1[0].y && point2[i].y <= point1[1].y)
-
-			{
-
+		for(var i = 0 ; i < point2.length ; i++) {
+			if(point2[i].x >= point1[0].x && point2[i].x <= point1[1].x && point2[i].y >= point1[0].y && point2[i].y <= point1[1].y) {
 				counter++;
-
 			}
-
 		}
-
-		if(counter==2)
-
-		{
-
+		if(counter==2) {
 			return true;
-
-		}
-
-		else
-
-		{
-
-			return false;
-
-		}
-
-	};
-
-	this.clone = function()
-
-	{
-
-		var tempX = this.x;
-
-		var tempY = this.y;
-
-		var tempW = this.width;
-
-		var tempH = this.height;
-
-
-
-		var tempRect = new Rectangle(tempX,tempY,tempW,tempH);
-
-
-
-		return tempRect;
-
-	};
-
-}
-
-
-/*
-*	THM_Calculator.js : Calculator Library for the THP.
-*	Last Updated: August 27, 2010.
-*
-*	Authors: Ryan Cui, Paul Vilchez, Elwin Ha
-*	Date: ?
-*	About:  This library provides calculator functionality to THP demos.
-*				This library requires Osmosis and THP_Template to function.
-*/
-
-var hackFunc; // global variable req'd
-
-/*
-*	Constructor: THM_Calculator(plugin, template, x, y, width, height)
-*	Parameters: Plugin ID, Template ID, X-coord, Y-coord, Desired width, desired height.
-*	Callable functions:	- show()
-*									- hide()
-*									- remove()
-*/
-function THM_Calculator(plugin, template, x,y,width,height)
-{
-	this.visible = true;
-	var object = this;
-	this.x = x;
-	this.y = y;
-	this.width = width;
-	this.height = height;
-	this.plugin = plugin;
-	this.template = template;
-	this.layer = new Layer(this.plugin,0, 0,480,320);
-
-	this.label = new Label(this.plugin,"",1,0,0,480,320);
-	this.label.setColor(1,1,1,0);
-	this.label.subscribe();
-
-	this.calculator = new Sprite(this.plugin,"newcalculator4%20.png",this.x,this.y,this.width,this.height);
-	this.input = new Label (this.plugin, "0", 2, (this.x + 5), (this.y+this.height-35), (this.width - 5 * 2), 30);
-	this.calculator.setShape("square");
-
-	this.calculator.setDrag();
-	this.label.moveCallback(this.label,"mouseMove");
-	this.calculator.downCallback(this.calculator,"mouseDown");
-	this.calculator.upCallback(this.label,"mouseUp");
-
-	this.layer.addChild(this.calculator);
-	this.calculator.addChild(this.label);
-	this.layer.addChild(this.calculator);
-	this.layer.setColor(1,1,0,0);
-
-	var buttonArray;
-	var colArray;
-	//this.passAnswerString;
-	//this.bindSheet;
-	this.answer = 0;
-	this.inputstring = "";
-	//this.mouseX;
-	//this.mouseY;
-	var initalX;
-	var initalY;
-	var initialize = 0;
-	var buttonWidth;
-	var buttonHeight;
-
-	this.equalFunction = function(){};
-
-		this.setMouseXY = function(x,y){
-		   this.mouseX = x;
-		   this.mouseY = y;
-		};
-
-		this.label.mouseMove = function(x,y){
-		   if(object.mouseDown){
-				object.input.setPosition(object.calculator.x + 5,object.calculator.y+object.calculator.height-35);
-				object.positionStuff();
-		   }
-		};
-		this.calculator.mouseDown = function(x,y){
-			object.mouseDown = true;
-			initalX = object.mouseX;
-			initalY = object.mouseY;
-		};
-		this.calculator.mouseUp = function(x,y){
-			clearInterval(initialize);
-			object.mouseDown = false;
-		};
-		this.changePosition = function(x,y){
-			this.calculator.setPosition(x,y);
-		};
-		this.changeDimension = function(width,height){
-			this.calculator.setDimensions(width,height);
-		};
-
-    this.updateString = function(value){
-			if(value == "="){
-				try {
-					this.answer = eval(this.inputstring);
-				} catch (e) {
-					this.answer = 0;
-				}
-                if(isNaN(this.answer)) this.answer = 0;
-				this.input.setText(String(this.answer));
-				object.equalFunction();
-			} else if(value == "clear"){
-				this.input.setText("");
-				this.inputstring = "";
-			} else if(value == "exit"){
-				this.answer = 0;
-				try {
-					this.answer = eval(this.inputstring);
-				} catch (e) {
-					this.answer = 0;
-				}
-				logDebug("calc.updateString exit answer: " + this.answer);
-				this.input.setText(String(this.answer));
-				this.externalFunction();
-				this.inputstring = "";
-				this.input.setText("0");
-				this.hide();
-			} else{
-				this.inputstring += value;
-				this.input.setText(this.inputstring);
-			}
-	};
-/*
-*	function externalFunction()
-*	This function is currenty set up for interaction with the THM_Spreadsheet module.
-*	It checks for a flag in the demo file (bindSheet), and if it is present and true, it calls a function in that demo (window.updateCellString())
-*	This functionality can be extended by adding other flags to check for; and other functions to call.
-*/
-	this.externalFunction = function(){
-		if (this.bindSheet === true){
-			window.updateCellString();
-		}
-	};
-	this.mouseClick = function(x,y){
-		object.updateString(this.value);
-	};
-
-	this.positionStuff = function(){
-		for(var i = 0; i<buttonArray.length; i ++){
-			for(var j = 0; j<buttonArray[i].length; j++){
-				buttonArray[i][j].setPosition(object.calculator.x+5+i*(buttonWidth+5),object.calculator.y+object.calculator.height-object.input.height-5*2-(buttonHeight+6)*j-20);
-			}
-		}
-	};
-
-	this.build = function(){
-		this.input.setColor(1,1,1,1);
-		this.input.setCaptionColor(0,0,0,1);
-		this.input.setWrap(true);
-		this.layer.addChild(this.input);
-
-		buttonArray = new Array(4);
-		buttonWidth = (this.width - 4*5)/4;
-		buttonHeight = (this.height - 8*5 - this.input.height)/6;
-
-		for(var i = 0; i<buttonArray.length; i ++){
-			if(i===0){
-				colArray = new Array(6);
-			} else if(i==3){
-				colArray = new Array(4);
-			} else {
-				colArray = new Array(5);
-			}
-
-			buttonArray[i] = colArray;
-
-			for(var j = 0; j<colArray.length;j++){
-				colArray[j] = new Label(this.plugin,"",1,this.x+5+i*(buttonWidth+5),this.y+this.height-this.input.height-5*2-(buttonHeight+6)*j-20,buttonWidth,buttonHeight);
-
-				buttonArray[i][j] = colArray[j];
-				buttonArray[i][j].clickCallback(buttonArray[i][j],"buttonClick");
-
-				buttonArray[i][j].setVisibility(false);
-				this.layer.addChild(buttonArray[i][j]);
-
-				buttonArray[i][j].buttonClick = this.mouseClick;
-				if(i === 0 && j == 5){
-					buttonArray[i][j].setDimensions(this.width -5*2, buttonHeight);
-				}
-				if(i == 2 && j == 4){
-					buttonArray[i][j].setDimensions(buttonWidth*2+5, buttonHeight);
-				}
-				buttonArray[i][j].unsubscribe();
-			}
-		}
-		buttonArray[0][0].value = "7";
-		buttonArray[0][1].value = "4";
-		buttonArray[0][2].value = "1";
-		buttonArray[0][3].value = ".";
-		buttonArray[0][4].value = "(";
-		buttonArray[0][5].value = "exit";
-
-		buttonArray[1][0].value = "8";
-		buttonArray[1][1].value = "5";
-		buttonArray[1][2].value = "2";
-		buttonArray[1][3].value = "0";
-		buttonArray[1][4].value = ")";
-
-		buttonArray[2][0].value = "9";
-		buttonArray[2][1].value = "6";
-		buttonArray[2][2].value = "3";
-		buttonArray[2][3].value = "=";
-		buttonArray[2][4].value = "clear";
-
-		buttonArray[3][0].value = "+";
-		buttonArray[3][1].value = "-";
-		buttonArray[3][2].value = "*";
-		buttonArray[3][3].value = "/";
-	};
-/*
-*	function show()
-*	Call this function to make the calculator visible. A curtain is generated behind it to block unwanted clicks.
-*/
-	this.show = function(){
-		plugin.addSpecial(buttonArray[0][0].getId());
-		plugin.addSpecial(buttonArray[0][1].getId());
-		plugin.addSpecial(buttonArray[0][2].getId());
-		plugin.addSpecial(buttonArray[0][3].getId());
-		plugin.addSpecial(buttonArray[0][4].getId());
-		plugin.addSpecial(buttonArray[0][5].getId());
-
-		plugin.addSpecial(buttonArray[1][0].getId());
-		plugin.addSpecial(buttonArray[1][1].getId());
-		plugin.addSpecial(buttonArray[1][2].getId());
-		plugin.addSpecial(buttonArray[1][3].getId());
-		plugin.addSpecial(buttonArray[1][4].getId());
-
-		plugin.addSpecial(buttonArray[2][0].getId());
-		plugin.addSpecial(buttonArray[2][1].getId());
-		plugin.addSpecial(buttonArray[2][2].getId());
-		plugin.addSpecial(buttonArray[2][3].getId());
-		plugin.addSpecial(buttonArray[2][4].getId());
-
-		plugin.addSpecial(buttonArray[3][0].getId());
-		plugin.addSpecial(buttonArray[3][1].getId());
-		plugin.addSpecial(buttonArray[3][2].getId());
-		plugin.addSpecial(buttonArray[3][3].getId());
-
-		plugin.addSpecial(this.calculator.getId());
-		plugin.addSpecial(this.label.getId());
-		plugin.addSpecial(this.template.curtainLayer.getId());
-
-		this.template.showCurtain();
-
-		buttonArray[0][0].subscribe();
-		buttonArray[0][1].subscribe();
-		buttonArray[0][2].subscribe();
-		buttonArray[0][3].subscribe();
-		buttonArray[0][4].subscribe();
-		buttonArray[0][5].subscribe();
-
-		buttonArray[1][0].subscribe();
-		buttonArray[1][1].subscribe();
-		buttonArray[1][2].subscribe();
-		buttonArray[1][3].subscribe();
-		buttonArray[1][4].subscribe();
-
-		buttonArray[2][0].subscribe();
-		buttonArray[2][1].subscribe();
-		buttonArray[2][2].subscribe();
-		buttonArray[2][3].subscribe();
-		buttonArray[2][4].subscribe();
-
-		buttonArray[3][0].subscribe();
-		buttonArray[3][1].subscribe();
-		buttonArray[3][2].subscribe();
-		buttonArray[3][3].subscribe();
-
-		this.calculator.subscribe();
-		this.label.subscribe();
-		this.layer.setVisibility(true);
-		this.visible = true;
-	};
-/*
-*	function hide()
-*	Call this function to hide the calculator and remove unwanted interactivity.
-*/
-	this.hide = function(){
-
-		plugin.removeSpecial(buttonArray[0][0].getId());
-		plugin.removeSpecial(buttonArray[0][1].getId());
-		plugin.removeSpecial(buttonArray[0][2].getId());
-		plugin.removeSpecial(buttonArray[0][3].getId());
-		plugin.removeSpecial(buttonArray[0][4].getId());
-		plugin.removeSpecial(buttonArray[0][5].getId());
-
-		plugin.removeSpecial(buttonArray[1][0].getId());
-		plugin.removeSpecial(buttonArray[1][1].getId());
-		plugin.removeSpecial(buttonArray[1][2].getId());
-		plugin.removeSpecial(buttonArray[1][3].getId());
-		plugin.removeSpecial(buttonArray[1][4].getId());
-
-		plugin.removeSpecial(buttonArray[2][0].getId());
-		plugin.removeSpecial(buttonArray[2][1].getId());
-		plugin.removeSpecial(buttonArray[2][2].getId());
-		plugin.removeSpecial(buttonArray[2][3].getId());
-		plugin.removeSpecial(buttonArray[2][4].getId());
-
-		plugin.removeSpecial(buttonArray[3][0].getId());
-		plugin.removeSpecial(buttonArray[3][1].getId());
-		plugin.removeSpecial(buttonArray[3][2].getId());
-		plugin.removeSpecial(buttonArray[3][3].getId());
-
-		plugin.removeSpecial(this.calculator.getId());
-		plugin.removeSpecial(this.label.getId());
-		plugin.removeSpecial(this.template.curtainLayer.getId());
-
-		this.template.hideCurtain();
-
-		buttonArray[0][0].unsubscribe();
-		buttonArray[0][1].unsubscribe();
-		buttonArray[0][2].unsubscribe();
-		buttonArray[0][3].unsubscribe();
-		buttonArray[0][4].unsubscribe();
-		buttonArray[0][5].unsubscribe();
-		buttonArray[1][0].unsubscribe();
-		buttonArray[1][1].unsubscribe();
-		buttonArray[1][2].unsubscribe();
-		buttonArray[1][3].unsubscribe();
-		buttonArray[1][4].unsubscribe();
-
-		buttonArray[2][0].unsubscribe();
-		buttonArray[2][1].unsubscribe();
-		buttonArray[2][2].unsubscribe();
-		buttonArray[2][3].unsubscribe();
-		buttonArray[2][4].unsubscribe();
-
-		buttonArray[3][0].unsubscribe();
-		buttonArray[3][1].unsubscribe();
-		buttonArray[3][2].unsubscribe();
-		buttonArray[3][3].unsubscribe();
-
-		this.layer.setVisibility(false);
-
-		this.visible = false;
-	};
-/*
-*	function remove()
-*	Call this function on clean up so that ghost callbacks from previous scenes don't occur.
-*/
-	this.remove = function(){
-		buttonArray[0][0].clickCallback(this, "blank");
-		buttonArray[0][1].clickCallback(this, "blank");
-		buttonArray[0][2].clickCallback(this, "blank");
-		buttonArray[0][3].clickCallback(this, "blank");
-		buttonArray[0][4].clickCallback(this, "blank");
-		buttonArray[0][5].clickCallback(this, "blank");
-		buttonArray[1][0].clickCallback(this, "blank");
-		buttonArray[1][1].clickCallback(this, "blank");
-		buttonArray[1][2].clickCallback(this, "blank");
-		buttonArray[1][3].clickCallback(this, "blank");
-		buttonArray[1][4].clickCallback(this, "blank");
-
-		buttonArray[2][0].clickCallback(this, "blank");
-		buttonArray[2][1].clickCallback(this, "blank");
-		buttonArray[2][2].clickCallback(this, "blank");
-		buttonArray[2][3].clickCallback(this, "blank");
-		buttonArray[2][4].clickCallback(this, "blank");
-
-		buttonArray[3][0].clickCallback(this, "blank");
-		buttonArray[3][1].clickCallback(this, "blank");
-		buttonArray[3][2].clickCallback(this, "blank");
-		buttonArray[3][3].clickCallback(this, "blank");
-	};
-	this.blank = function(){};
-	this.build();
-}
-function THM_fastMath()
-
-{
-
-	var sinTable = new Array(3600);
-
-	var cosTable = new Array(3600);
-
-
-
-	for(var i = 0 ; i < 3600 ; i++)
-
-	{
-
-		sinTable[i] = Math.sin((Math.PI/1800)*i);
-
-		cosTable[i] = Math.cos((Math.PI/1800)*i);
-
-	}
-
-
-
-	this.sin = function(passAngle)
-
-	{
-
-		this.theta = Math.round(passAngle*10);
-
-		this.checkAngles();
-
-		return sinTable[this.theta];
-
-	};
-
-	this.cos = function(passAngle)
-
-	{
-
-		this.theta = Math.round(passAngle*10);
-
-		this.checkAngles();
-
-		return cosTable[this.theta];
-
-	};
-
-	this.tan = function(passAngle)
-
-	{
-
-		this.theta = Math.round(passAngle*10);
-
-		this.checkAngles();
-
-		//Should return some arbitrary value if cosTable=0;
-
-		return (sinTable[this.theta]/cosTable[this.theta]);
-
-	};
-
-
-
-	this.checkAngles = function()
-
-	{
-
-		while(this.theta< 0 || this.theta>= 3600)
-
-		{
-
-			if(this.theta>=3600)
-
-			{
-
-				this.theta-=3600;
-
-			}
-
-			else if(this.theta<0)
-
-			{
-
-				this.theta+=3600;
-
-			}
-
-		}
-
-	};
-
-
-
-	this.moveVector2D = function(passPoint,passCircleVector)
-
-	{
-
-		passCircleVector.checkAngles();
-
-		var tempPoint = new Point();
-
-
-
-		tempPoint.x = passPoint.x + passCircleVector.radial*this.sin(passCircleVector.theta);
-
-		tempPoint.y = passPoint.y + passCircleVector.radial*this.cos(passCircleVector.theta);
-
-
-
-		return tempPoint;
-
-	};
-
-}
-
-
-
-/*
-
-*	THM_Spreadsheet.js : Spreadsheet Library for the THP.
-
-*	Last Updated: August 30, 2010.
-
-*
-
-*	Authors: Paul Vilchez, Elwin Ha, Ryan Cui
-
-*	Date: July 26 '10
-
-*	About:  This library allows for rapid templating of spreadsheets for THP demos.
-
-*				This library requires Osmosis and THP_Template to function.
-
-*/
-
-
-
-/*
-
-*	Constructor: THM_Spreadsheet(plugin,demo, rows, cols)
-
-*	Parameters: plugin ID, demo ID, number of rows, number of columns
-
-*	Callable functions:				- buildSheet()
-
-*									- setCellDimensions()
-
-*									- setCellText()
-
-*									- swap()
-
-*									- deleteMouseEvents()
-
-*									- tableOffset()
-
-*									- resizeRow()
-
-*									- resizeColumn()
-
-*									- addCalculatorIcon()
-
-*/
-
-function THM_Spreadsheet(plugin, demo, rows, cols){
-
-	//Variables
-
-	this.demo = demo;
-
-	this.plugin = plugin;
-
-	this.rows = rows;
-
-	this.cols = cols;
-
-	this.buildLayer = new Layer(this.plugin, 0, 0, 480, 320);
-
-	this.buildLayer.setColor(0,0,0,0);
-
-
-
-	//Arrays
-
-	this.cellArray = new Array(cols);
-
-	this.rowArray = [];
-
-	this.colArray = [];
-
-	this.rowCoordArray = new Array(this.rows);
-
-	this.rowCoordArray.x = new Array(this.rows);
-
-	this.rowCoordArray.y = new Array(this.rows);
-
-	this.colCoordArray = new Array(this.cols);
-
-	this.colCoordArray.x = new Array(this.cols);
-
-	this.colCoordArray.y = new Array(this.cols);
-
-
-
-	this.lineArray_col = [];
-
-	this.lineArray_row = [];
-
-	this.iconArray = [];
-
-	//Flags
-
-	this.lineLoaded=false;
-
-	this.offsetX=0;
-
-	this.offsetY=0;
-
-	//this.activeCell;
-
-	//Init
-
-	for(var i = 0 ; i < this.rows ; i++){
-
-		this.rowCoordArray[i]=0;
-
-		this.rowCoordArray.x[i]=0;
-
-		this.rowCoordArray.y[i]=0;
-
-	}
-
-	for(i = 0 ; i < this.cols ; i++){
-
-		this.colCoordArray[i]=0;
-
-		this.colCoordArray.x[i]=0;
-
-		this.colCoordArray.y[i]=0;
-
-	}
-
-	for (i = 0; i < cols; i++){
-
-		this.cellArray[i] = new Array(rows);
-
-	}
-
-/*
-
-*	function buildSheet(passScene)
-
-*	In: The scene on which the sheet will be drawn, eg. sceneQ1S1
-
-*	Out: A spreadsheet using the parameters passed in the constructor.
-
-*/
-
-	this.buildSheet = function(scene){
-
-		var i = 0;
-
-		var j = 0;
-
-		this.scene = scene;
-
-
-
-		for(i = 0; i < this.cols; i++){
-
-			for(j = 0; j < this.rows; j++){
-
-				this.cell = new TextBox(this.plugin, "("+i+","+j+")",1, 60 + 65*i, 225-25*j,60,20);
-
-				this.cell.subscribe();
-
-				this.cell.clickCallback(this, "cellClick");
-
-				this.buildLayer.addChild(this.cell);
-
-				this.cellArray[i][j] = this.cell;
-
-				this.cellArray[i][j].selected = false; //boolean flag for callback;
-
-			}
-
-		}
-
-		for(i = 0; i < this.rows; i++){
-
-			this.rowLabel = new Label(this.plugin, i, 1, 30, 225 - 25*i, 20, 20);
-
-			// --- Remove callbacks on the rows for speed ---
-
-			//this.rowLabel.subscribe();
-
-			//this.rowLabel.clickCallback(this, "rowClick");
-
-			//this.rowLabel.setDrag(this.demo.Mouse, true);
-
-
-
-			//this.rowLabel.selected = false; //boolean flag for callback;
-
-			//this.rowLabel.downCallback(this, "rowDown");
-
-			this.rowLabel.setCaptionColor(0,0,0,1);
-
-			this.rowLabel.setColor(1,1,1,0);
-
-
-
-			this.rowArray.push(this.rowLabel);
-
-			this.rowCoordArray.x[i] = this.rowLabel.x;
-
-			this.rowCoordArray.y[i] = this.rowLabel.y;
-
-
-
-			this.buildLayer.addChild(this.rowLabel);
-
-		}
-
-		for(j = 0; j < this.cols; j++){
-
-			this.colLabel = new Label(this.plugin, j, 1, 90 + 60*j, 250, 20, 20 );
-
-
-
-			// --- Remove callbacks on the columns for speed ---
-
-			//this.colLabel.clickCallback(this, "colClick");
-
-			//this.colLabel.setDrag(this.demo.Mouse, true);
-
-			//this.colLabel.subscribe();
-
-
-
-			//this.colLabel.selected = false; //boolean flag for callback;
-
-			//this.colLabel.downCallback(this, "colDown");
-
-
-
-			this.colLabel.setCaptionColor(0,0,0,1);
-
-			this.colLabel.setColor(1,1,1,0);
-
-
-
-			this.colArray.push(this.colLabel);
-
-			this.colCoordArray.x[j] = this.colLabel.x;
-
-			this.colCoordArray.y[j] = this.colLabel.y;
-
-			this.buildLayer.addChild(this.colLabel);
-
-		}
-
-
-
-		this.scene.addChild(this.buildLayer);
-
-	};
-
-/*
-
-*	function setCellDimensions(width,height)
-
-*	Lets you specify the dimensions of the cells within the sheet.
-
-*/
-
-	this.setCellDimensions = function(width, height){
-
-		this.width = width;
-
-		this.height = height;
-
-		var i = 0;
-
-
-
-		for(i = 0; i < this.cols; i++){
-
-			for(var j = 0; j < this.rows; j++){
-
-				this.cellArray[i][j].setPosition(60 + (this.width+5)*i, 225 - (this.height+5)*j);
-
-				this.cellArray[i][j].setDimensions(this.width, this.height);
-
-			}
-
-		}
-
-		for(i = 0 ; i <this.rowArray.length ; i ++ ) {
-
-			this.rowArray[i].setPosition(this.rowArray[i].x,this.cellArray[0][i].y+this.cellArray[0][i].height/2-this.rowArray[i].height/2);
-
-			this.rowCoordArray.x[i]=this.rowArray[i].x;
-
-			this.rowCoordArray.y[i]=this.rowArray[i].y;
-
-		}
-
-		for(i = 0 ; i <this.colArray.length ; i ++ ) {
-
-			this.colArray[i].setPosition(this.cellArray[i][0].x+this.cellArray[i][0].width/2-this.colArray[i].width/2,this.cellArray[i][0].height+this.cellArray[i][0].y);
-
-			this.colCoordArray.x[i]=this.colArray[i].x;
-
-			this.colCoordArray.y[i]=this.colArray[i].y;
-
-		}
-
-	};
-
-/*
-
-*	function setCellText(row, col, text)
-
-*	Set the text of a cell at a specified index.
-
-*/
-
-	this.setCellText = function(row, col, text){
-
-		this.text = text;
-
-		this.row = row;
-
-		this.col = col;
-
-		this.cellArray[col][row].setText(this.text);
-
-	};
-
-/*
-
-*	function cellClick(x,y)
-
-*	Determines which cell in a sheet is the active one.
-
-*/
-
-	this.cellClick = function(x,y){
-
-		var i = 0;
-
-		var j = 0;
-
-		var tempCol;
-
-		var tempRow;
-
-
-
-		for(i = 0; i < this.cols; i++){
-
-		    for(j = 0; j < this.rows; j++){
-
-		        this.cellArray[i][j].selected = false;
-
-		    }
-
-		}
-
-		for(i = 0; i < this.cols; i++){
-
-			for(j = 0; j < this.rows; j++){
-
-				if(x>=this.cellArray[i][j].x && x <= this.cellArray[i][j].x+this.cellArray[i][j].width){
-
-					tempCol = i;
-
-				}
-
-				if(y >= this.cellArray[i][j].y && y <= this.cellArray[i][j].y+this.cellArray[i][j].height){
-
-					tempRow = j;
-
-				}
-
-			}
-
-		}
-
-		this.cellArray[tempCol][tempRow].selected = true;
-
-		logDebug("(col: " + tempCol + ", row: " + tempRow +  ") is clicked.");
-
-		this.activeCell = this.cellArray[tempCol][tempRow];
-
-		//if (this.cellArray[tempCol][tempRow].getText() == "undefined"){
-
-		//	this.cellArray[tempCol][tempRow].setText("");
-
-		//}
-
-	};
-
-/*
-
-*	function rowClick(x,y)
-
-*	row-swapping functionality using mouse drag events
-
-*/
-
-	this.rowClick = function(x, y){
-
-		for(var i = 0 ; i < this.rows; i++){
-
-			if(this.rowArray[i].y != this.rowCoordArray.y[i]){
-
-				for(var j = 0 ; j < this.rows; j++){
-
-					if(j!=i){
-
-						if(((this.rowArray[i].y+this.rowArray[i].height/2)>this.rowArray[j].y) && ((this.rowArray[i].y+this.rowArray[i].height/2)<(this.rowArray[j].y+this.rowArray[j].height)) && this.rowArray[i].selected){
-
-							this.swap("row",i,j);
-
-							logDebug("ROW " + i + " and ROW " + j + " have been swapped.");
-
-						}
-
-					}
-
-				}
-
-			}
-
-			this.rowArray[i].selected=false;
-
-		}
-
-		for(i = 0 ; i < this.rows; i++){
-
-			this.rowArray[i].setPosition(this.rowCoordArray.x[i]+this.offsetX,this.rowCoordArray.y[i]+this.offsetY);
-
-		}
-
-	};
-
-/*
-
-*	function colClick(x,y)
-
-*	column-swapping functionality using mouse drag events
-
-*/
-
-	this.colClick = function(x, y){
-
-		for(var i = 0 ; i < this.cols; i++){
-
-			if(this.colArray[i].x != this.colCoordArray.x[i]){
-
-				for(var j = 0 ; j < this.cols; j++){
-
-					if(j!=i){
-
-						if(((this.colArray[i].x+this.colArray[i].width/2)>this.colArray[j].x) && ((this.colArray[i].x+this.colArray[i].width/2)<(this.colArray[j].x+this.colArray[j].width)) && this.colArray[i].selected){
-
-							this.swap("column",i,j);
-
-							logDebug("COLUMN " + i + " and COLUMN " + j + " have been swapped.");
-
-						}
-
-					}
-
-				}
-
-			}
-
-			this.colArray[i].selected=false;
-
-		}
-
-		for(i = 0 ; i < this.cols; i++){
-
-			this.colArray[i].setPosition(this.colCoordArray.x[i]+this.offsetX,this.colCoordArray.y[i]+this.offsetY);
-
-		}
-
-	};
-
-/*
-
-*	function rowDown(x,y)
-
-*	Selects a row on click.
-
-*/
-
-	this.rowDown = function(x,y){
-
-		for(var i = 0 ; i < this.rowArray.length ; i++){
-
-			if( x > this.rowArray[i].x && x < (this.rowArray[i].x+this.rowArray[i].width) &&  y > this.rowArray[i].y && y < (this.rowArray[i].y+this.rowArray[i].height)){
-
-				this.rowArray[i].selected=true;
-
-			}
-
-		}
-
-	};
-
-/*
-
-*	function colDown(x,y)
-
-*	Selects a column on click.
-
-*/
-
-	this.colDown = function(x,y){
-
-		for(var i = 0 ; i < this.colArray.length ; i++){
-
-			if( x > this.colArray[i].x && x < (this.colArray[i].x+this.colArray[i].width) &&  y > this.colArray[i].y && y < (this.colArray[i].y+this.colArray[i].height)){
-
-				this.colArray[i].selected=true;
-
-			}
-
-		}
-
-	};
-
-/*
-
-*	function swap(type, first, second)
-
-*	Takes in type="row" or type="col", then 2 index values, which will be swapped.
-
-*/
-
-	this.swap = function(type, first, second){
-
-		var tempArray = [];
-
-		var tempHolder = "";
-
-		var i = 0;
-
-		if(type == "row"){
-
-			for(i = 0; i < this.cols; i++){
-
-				tempHolder = this.cellArray[i][first].getText();
-
-				tempArray.push(tempHolder);
-
-
-
-				this.cellArray[i][first].setText(this.cellArray[i][second].getText());
-
-				this.cellArray[i][second].setText(tempArray[i]);
-
-			}
-
-		}
-
-		else if(type == "column"){
-
-			for(i = 0; i < this.rows; i++){
-
-				tempHolder = this.cellArray[first][i].getText();
-
-				tempArray.push(tempHolder);
-
-
-
-				this.cellArray[first][i].setText(this.cellArray[second][i].getText());
-
-				this.cellArray[second][i].setText(tempArray[i]);
-
-			}
-
-		}
-
-		else {
-
-			logDebug("Invalid type specifed. Please use 'row' or 'column'.");
-
-		}
-
-	};
-
-/*
-
-*	function deleteMouseEvents()
-
-*	Sets the entire sheet to a non-interactive state.
-
-*/
-
-	this.deleteMouseEvents = function(){
-
-		var i = 0;
-
-		var j = 0;
-
-	    for(j = 0 ; j < this.cols ; j++){
-
-			for(i = 0 ; i < this.rows ; i++ ){
-
-				this.cellArray[j][i].unsubscribe();
-
-			}
-
-		}
-
-		for(i = 0 ; i < this.rows ; i++){
-
-			this.rowArray[i].unsubscribe();
-
-		}
-
-		for(i = 0 ; i < this.cols ; i++){
-
-			this.colArray[i].unsubscribe();
-
-		}
-
-	};
-
-/*
-
-*	function deleteLabelEvents()
-
-*	Sets all labels to a non-interactive state.
-
-*/
-
-    this.deleteLabelEvents = function()
-
-	{
-
-		var i = 0;
-
-	    for(i = 0 ; i < this.rows ; i++)
-
-		{
-
-			this.rowArray[i].unsubscribe();
-
-		}
-
-		for(i = 0 ; i < this.cols ; i++)
-
-		{
-
-			this.colArray[i].unsubscribe();
-
-		}
-
-	};
-
-/*
-
-*	function generateBorder()
-
-*	Draws a border around each cell in the sheet.
-
-*/
-
-	this.generateBorder = function()
-
-	{
-
-
-
-			var xOffset = -5/2;
-
-			var yOffset = 5/2;
-
-			var i = 0;
-
-
-
-			for(i = 0 ; i<this.cols ; i++){
-
-				if(!this.lineLoaded) {
-
-					this.lineArray_col.push(new Primitive(this.plugin,"line"));
-
-					this.buildLayer.addChild(this.lineArray_col[i]);
-
-				}
-
-				this.lineArray_col[i].setPoints(this.cellArray[i][0].x+xOffset , this.cellArray[i][0].y+this.cellArray[i][0].height+yOffset,this.cellArray[i][0].x +xOffset,this.cellArray[0][this.rows-1].y-5+yOffset);
-
-				this.lineArray_col[i].setVisibility(true);
-
-			}
-
-
-
-			if(!this.lineLoaded) {
-
-				this.lineArray_col.push(new Primitive(this.plugin,"line"));
-
-				this.buildLayer.addChild(this.lineArray_col[this.lineArray_col.length-1]);
-
-			}
-
-			this.lineArray_col[this.lineArray_col.length-1].setPoints(this.cellArray[this.cols-1][0].x+this.cellArray[this.cols-1][0].width+5+xOffset , this.cellArray[0][0].y+this.cellArray[0][0].height+yOffset,this.cellArray[this.cols-1][0].x+this.cellArray[this.cols-1][0].width + 5 +xOffset,this.cellArray[0][this.rows-1].y-5+yOffset);
-
-			this.lineArray_col[this.lineArray_col.length-1].setVisibility(true);
-
-
-
-
-
-			for(i = 0 ; i<this.rows ; i++){
-
-				if(!this.lineLoaded) {
-
-					this.lineArray_row.push(new Primitive(this.plugin,"line"));
-
-					this.buildLayer.addChild(this.lineArray_row[i]);
-
-				}
-
-
-
-				this.lineArray_row[i].setPoints(this.cellArray[0][0].x+xOffset,this.cellArray[0][i].y+this.cellArray[0][i].height+yOffset,this.cellArray[this.cols-1][0].x+this.cellArray[this.cols-1][0].width+5+xOffset,this.cellArray[0][i].y+this.cellArray[0][i].height+yOffset);
-
-				this.lineArray_row[i].setVisibility(true);
-
-			}
-
-
-
-			if(!this.lineLoaded) {
-
-				this.lineArray_row.push(new Primitive(this.plugin,"line"));
-
-				this.buildLayer.addChild(this.lineArray_row[this.lineArray_row.length-1]);
-
-			}
-
-
-
-			this.lineArray_row[this.lineArray_row.length-1].setPoints(this.cellArray[0][0].x+xOffset,this.cellArray[0][this.rows-1].y-5+yOffset,this.cellArray[this.cols-1][0].x+this.cellArray[this.cols-1][0].width+5+xOffset,this.cellArray[0][this.rows-1].y-5+yOffset);
-
-			this.lineArray_row[this.lineArray_row.length-1].setVisibility(true);
-
-
-
-		this.lineLoaded=true;
-
-	};
-
-
-
-    this.addParent = function(passScene)
-
-	{
-
-		var i = 0;
-
-		this.scene=passScene;
-
-		this.scene.addChild(this.buildLayer);
-
-		/*for(i = 0 ; i < this.cols ; i++){
-
-			for(var j = 0 ; j < this.rows ; j++){
-
-				this.scene.addChild(this.cellArray[i][j]);
-
-			}
-
-		}
-
-		for(i = 0 ; i < this.lineArray_row.length ; i++){
-
-			this.scene.addChild(this.lineArray_row[i]);
-
-		}
-
-		for(i = 0 ; i < this.lineArray_col.length ; i++){
-
-			this.scene.addChild(this.lineArray_col[i]);
-
-		}
-
-		for(i = 0 ; i < this.rows ; i++){
-
-			this.scene.addChild(this.rowArray[i]);
-
-		}
-
-		for(i = 0 ; i < this.cols ; i++){
-
-			this.scene.addChild(this.colArray[i]);
-
-		}*/
-
-	};
-
-
-
-/*
-
-*	function tableOffset(passX, passY);
-
-*	Useful for positioning the table after creation, since the table is created at the same coordinates each time.
-
-*	Parameters are the desired x and y coordinates.
-
-*/
-
-	this.tableOffset = function(passX,passY){
-
-		var i = 0;
-
-		this.offsetX =passX;
-
-		this.offsetY =passY;
-
-
-
-		for(i = 0 ; i < this.rowArray.length ; i++){
-
-			this.rowArray[i].setPosition(this.rowArray[i].x+passX,this.rowArray[i].y+passY);
-
-		}
-
-		for(i = 0 ; i < this.colArray.length ; i++){
-
-			this.colArray[i].setPosition(this.colArray[i].x+passX,this.colArray[i].y+passY);
-
-		}
-
-		for(i = 0 ; i < this.cellArray.length ; i++){
-
-			for(var j = 0 ; j < this.cellArray[0].length ; j++){
-
-				this.cellArray[i][j].setPosition(this.cellArray[i][j].x+passX,this.cellArray[i][j].y+passY);
-
-			}
-
-		}
-
-		for(i = 0 ; i < this.lineArray_row.length ; i++){
-
-			this.lineArray_row[i].setPoints(this.lineArray_row[i].x+passX,this.lineArray_row[i].y+passY,this.lineArray_row[i].width+passX,this.lineArray_row[i].height+passY);
-
-		}
-
-		for(i = 0 ; i < this.lineArray_col.length ; i++){
-
-			this.lineArray_col[i].setPoints(this.lineArray_col[i].x+passX,this.lineArray_col[i].y+passY,this.lineArray_col[i].width+passX,this.lineArray_col[i].height+passY);
-
-		}
-
-	};
-
-/*
-
-*	function labelOffset(passX, passY)
-
-*	TODO: function for repositioning the row/col labels
-
-*/
-
-	this.labelOffset = function(passX, passY){
-
-		this.offsetX =passX;
-
-		this.offsetY =passY;
-
-		//Do stuff.
-
-	};
-
-/*
-
-*	function resizeColumn(passIndex, passWidth)
-
-*	Parameters: desired column index; desired width of cells
-
-*/
-
-	this.resizeColumn = function(passIndex,passWidth){
-
-		var i = 0;
-
-		var deltaWidth = passWidth-this.cellArray[passIndex][0].width;
-
-		for(i = 0 ; i < this.rows ; i++){
-
-			this.cellArray[passIndex][i].setDimensions(passWidth,this.cellArray[passIndex][i].height);
-
-		}
-
-		for(i = (passIndex+1) ; i < this.cols ; i++){
-
-			for(var j = 0 ; j < this.rows ; j ++){
-
-				this.cellArray[i][j].setPosition(this.cellArray[i][j].x+deltaWidth,this.cellArray[i][j].y);
-
-			}
-
-		}
-
-
-
-		for(i = 0 ; i <this.rowArray.length ; i ++ ) {
-
-			this.rowArray[i].setPosition(this.rowArray[i].x,this.cellArray[0][i].y+this.cellArray[0][i].height/2-this.rowArray[i].height/2);
-
-			this.rowCoordArray.x[i]=this.rowArray[i].x;
-
-			this.rowCoordArray.y[i]=this.rowArray[i].y;
-
-		}
-
-		for(i = 0 ; i <this.colArray.length ; i ++ ) {
-
-			this.colArray[i].setPosition(this.cellArray[i][0].x+this.cellArray[i][0].width/2-this.colArray[i].width/2,this.cellArray[i][0].height+this.cellArray[i][0].y);
-
-			this.colCoordArray.x[i]=this.colArray[i].x;
-
-			this.colCoordArray.y[i]=this.colArray[i].y;
-
-		}
-
-
-
-		this.generateBorder();
-
-	};
-
-	this.resizeRow = function(passIndex,passHeight){
-
-		var i = 0;
-
-		var deltaHeight = passHeight-this.cellArray[0][passIndex].height;
-
-		for(i = 0 ; i < this.cols ; i++){
-
-			this.cellArray[i][passIndex].setDimensions(this.cellArray[i][passIndex].width,passHeight);
-
-			this.cellArray[i][passIndex].setPosition(this.cellArray[i][passIndex].x,this.cellArray[i][passIndex].y-deltaHeight);
-
-		}
-
-		for(i = (passIndex+1) ; i < this.rows ; i++){
-
-			for(var j = 0 ; j < this.cols ; j++){
-
-				this.cellArray[j][i].setPosition(this.cellArray[j][i].x, this.cellArray[j][i].y-deltaHeight);
-
-			}
-
-		}
-
-
-
-		for(i = 0 ; i <this.rowArray.length ; i ++ ) {
-
-			this.rowArray[i].setPosition(this.rowArray[i].x,this.cellArray[0][i].y+this.cellArray[0][i].height/2-this.rowArray[i].height/2);
-
-			this.rowCoordArray.x[i]=this.rowArray[i].x;
-
-			this.rowCoordArray.y[i]=this.rowArray[i].y;
-
-		}
-
-		for(i = 0 ; i <this.colArray.length ; i ++ ) {
-
-			this.colArray[i].setPosition(this.cellArray[i][0].x+this.cellArray[i][0].width/2-this.colArray[i].width/2,this.cellArray[i][0].height+this.cellArray[i][0].y);
-
-			this.colCoordArray.x[i]=this.colArray[i].x;
-
-			this.colCoordArray.y[i]=this.colArray[i].y;
-
-		}
-
-
-
-		this.generateBorder();
-
-	};
-
-/*
-
-*	DEPRECATED function hideSheet();
-
-*	Please use deleteMouseEvents() in the future.
-
-*/
-
-	this.hideSheet = function(){
-
-		for(var i = 0; i < this.cols; i++){
-
-			for(var j = 0; j < this.rows; j++){
-
-				this.cell.unsubscribe();
-
-			}
-
-		}
-
-	};
-
-/*
-
-*	function addCalculatorIcon(passTemplate, passType, passNum)
-
-*	Adds small calculator icons to the right-most side of specified rows or columns.
-
-*	Parameters: template ID, type="row" or type="column", desired index.
-
-*	Note that this needs the THM_Calculator class included to function properly.
-
-*/
-
-	this.addCalculatorIcon = function(passTemplate, passType, passNum){
-
-		this.scene = passTemplate.getCurrentScene();
-
-		logDebug(this.scene);
-
-		this.type = passType;
-
-		this.num = passNum;
-
-		var i = 0;
-
-		var calcIcon;
-
-
-
-		if(this.type == "row"){
-
-			for(i = 0; i < this.cols; i++){
-
-				calcIcon = new Sprite(this.plugin,"calcIcon.png",0,0,15,15);
-
-				calcIcon.subscribe();
-
-				calcIcon.clickCallback(window,"iconClick");
-
-				calcIcon.downCallback(window,"iconDown");
-
-				this.buildLayer.addChild(calcIcon);
-
-				calcIcon.setPosition(this.cellArray[i][this.num].x + this.cellArray[i][this.num].width - 15, this.cellArray[i][this.num].y+2);
-
-			}
-
-		} else if(this.type == "column"){
-
-			for(i = 0; i < this.rows; i++){
-
-				calcIcon = new Sprite(this.plugin,"calcIcon.png",0,0,15,15);
-
-				calcIcon.setShape("square");
-
-				calcIcon.subscribe();
-
-				calcIcon.clickCallback(window,"iconClick");
-
-				calcIcon.bind = this.cellArray[this.num][i];
-
-				this.buildLayer.addChild(calcIcon);
-
-				calcIcon.setPosition(this.cellArray[this.num][i].x + this.cellArray[this.num][i].width - 15, this.cellArray[this.num][i].y+2);
-
-				this.iconArray.push(calcIcon);
-
-			}
-
 		} else {
-
-			logDebug("Invalid type specified. Please use ''row' or 'column'.");
-
+			return false;
 		}
-
 	};
 
+	/**
+	Create a copy of this rectangle and return it.
+	@param {void} Nothing.
+	@return {object} Returns a new copy of this rectangle.
+	*/
+	this.clone = function() {
+		var tempRect = new Rectangle(this.x, this.y, this.width, this.height);
+		return tempRect;
+	};
 }
-
-/*
-
-*	function iconClick(x,y)
-
-*	Click callback for the icons added by addCalculatorIcon()
-
-*	Note: For Calculator extending only, at the moment.
-
-*			 Please call the Calculator variable "calculator"
-
-*/
-
-window.iconClick = function(x,y){
-
-	calculator.layer.setVisibility(true);
-
-	calculator.show();
-
-};
-
-/*
-
-*	function clickHighlight(object)
-
-*/
-
-function clickHighlight(object){
-
-	this.x = object.x+1;
-
-	this.y = object.y+1;
-
-	this.width = object.width+1;
-
-	this.height = object.height+1;
-
-}
-
 /*! THP_Template.js */
 // ---------------------------------------------------------------------
 // THP_Template.js
@@ -4136,9 +2829,15 @@ function clickHighlight(object){
 //           the presence of osmosis.js compatibility layer to function
 //           properly!
 // ---------------------------------------------------------------------
-
-// ---------------------------------------------------------------------
-// THP_Template: The main object of the plugin
+/**
+The main object of the demo
+@class THP_Template
+@param  {object} plugin The monocleGL plugin object
+@param  {number} width The width of the sprite
+@param  {number} height The height of the sprite
+@param  {number} sceneDescriptor The number of scenes in this demo
+@return {void} Nothing
+*/
 function THP_Template(plugin, width, height, sceneDescriptor) {
     var that = this;
 	if (typeof jQuery === "undefined")	{
@@ -4188,7 +2887,7 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 	// Create the scene array if the user entered a number for the # of questions
 	this.currentScene = 0;
     this.totalScenes = 0;
-	if( typeof sceneDescriptor === "number")	{
+	if( typeof sceneDescriptor === "number") {
 		this.totalScenes = sceneDescriptor;
 		sceneDescriptor = new Array();
 
@@ -4233,10 +2932,6 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
     this.preload_layer.addChild(this.preload_loadingbar);
     this.preload_layer.addChild(this.preload_label);
     this.plugin.setScene(this.preload_scene.getId());
-
-    // The arrow on the answer and bottom panel
-    this.bottomPanelHoverArrowSprite = new Sprite(this.plugin, "btnSmallArrowUpGrey.png", 230, 55, 20, 20);
-    this.answerPanelHoverArrowSprite = new Sprite(this.plugin, "btnSmallArrowLeftGrey.png", -24, 150, 20, 20);
 
     // Demo background
     this.layoutFrameSprite = new Sprite(this.plugin, "demo_layout_frame.png", 0, 0, 480, 320);
@@ -4311,7 +3006,6 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 	this.answerPanelLayer.addChild(this.wifiBlueSprite);
     this.answerPanelLayer.addChild(this.checkSprite);
     this.answerPanelLayer.addChild(this.crossSprite);
-    this.answerPanelLayer.addChild(this.answerPanelHoverArrowSprite);
 
 	// Create the bottom panel layer
     this.bottomPanelLayer = new Layer(this.plugin, 0, -51, 480, 51);
@@ -4356,7 +3050,6 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
     this.bottomPanelLayer.addChild(this.refreshButton);
     this.bottomPanelLayer.addChild(this.exploreButton);
     this.bottomPanelLayer.addChild(this.triesLabel);
-    this.bottomPanelLayer.addChild(this.bottomPanelHoverArrowSprite);
 
 	// Add the arrows pointing up to the bottom of the screen
     this.bottomPanelHoverSprite = new Sprite(this.plugin, "", 0, 0, this.width, 32);
@@ -4375,6 +3068,10 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
     this.problemAreaHoverSprite.subscribe();
     this.problemAreaHoverSprite.overCallback(this, "problemAreaHoverCallback");
 	this.problemAreaHoverSprite.clickCallback(this, "problemAreaHoverCallback");
+
+	// The arrow on the answer and bottom panel
+    this.bottomPanelHoverArrowSprite = new Sprite(this.plugin, "btnSmallArrowUpGrey.png", 230, 0, 20, 20);
+    this.answerPanelHoverArrowSprite = new Sprite(this.plugin, "btnSmallArrowLeftGrey.png", 460, 150, 20, 20);
 
 	// Back to PhoneGap button
     // TODO: Make the functionality of this button more obvious
@@ -4438,6 +3135,8 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
     this.problemLayer = new Layer(this.plugin, 0, 0, 480, 320);
     this.problemLayer.setColor(0.88, 0.88, 0.88, 1.0);
     this.problemLayer.addChild(this.layoutFrameSprite);
+    this.problemLayer.addChild(this.bottomPanelHoverArrowSprite);
+    this.problemLayer.addChild(this.answerPanelHoverArrowSprite);
 
     // Setup the curtain layer to darken the screen
     this.curtainLayer = new Layer(this.plugin, 0, 0, this.width, this.height);
@@ -4477,24 +3176,32 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 	// -------------------------------------------------------------------------
     // Functions
 
-	// -------------------------------------------------------------------------
-    // Returns the cliping information for the top and the bottom of the plugin
+	/**
+	Returns the cliping information for the top and the bottom of the plugin
+	@param  {void} Nothing
+	@return {array} An array with the 1st element the header clipping value and the 2nd element being the footer clipping value.
+	*/
     this.getWindowClipping = new function() {
     		logDebug("Clipping infromation called, header: "+ this.headerClipping + " footer: " + this.footerClipping);
         return [this.headerClipping, this.footerClipping];
     };
 
-	// -------------------------------------------------------------------------
-    // Set up callback functions for the show answer button
+	/**
+	Set up callback functions for when the show answer button is pressed.
+	@param  {number} x The x position of the mouse.
+	@param  {number} y The y position of the mouse.
+	@return {void} Nothing.
+	*/
     this.showAnswer = function(x, y) {
    		var scene = this.getCurrentScene();
-
-        //logDebug("Show answer scene: " + scene);
 		scene.showCorrectAnswer();
 	};
 
-    // -------------------------------------------------------------------------
-    // Set up callback functions for the submit button
+    /**
+	Set up callback functions for when the submit button is pressed.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.submitAnswer = function() {
         if( this.totalFinished === this.totalScenes || this.getCurrentScene().getCompleted() ) {
         		logError("The demo tried to submit a question after it's done answering all the questions.");
@@ -4536,8 +3243,12 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         this.drawUI();
     };
 
-	// -------------------------------------------------------------------------
-    // Set up the bottom panel callback
+	/**
+	Set up the callback function to extend the bottom panel when the mouse goes over the bottom part of the screen.
+	@param  {number} x The x position of the mouse.
+	@param  {number} y The y position of the mouse.
+	@return {void} Nothing.
+	*/
     this.bottomPanelHoverCallback = function(x, y) {
     		// Check if state of bottom panel is retracted then extend the bottom panel
         if(this.bottomPanelState === this.panelState.RETRACTED) {
@@ -4545,8 +3256,12 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
     };
 
-	// ---------------------------------------------------------------------
-    // Set up the answer panel callback
+	/**
+	Set up the callback function to extend the answer panel when the mouse goes over the right part of the screen.
+	@param  {number} x The x position of the mouse.
+	@param  {number} y The y position of the mouse.
+	@return {void} Nothing.
+	*/
     this.answerPanelHoverCallback = function(x, y) {
     		// Check if state of answer panel is retracted then extend the answer panel
         if(this.answerPanelState === this.panelState.RETRACTED) {
@@ -4554,8 +3269,12 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
     };
 
-	// ---------------------------------------------------------------------
-    // Set up the problem area callback
+	/**
+	Set up the callback function to retract the answer and bottom panels when the mouse goes over the middle of the screen.
+	@param  {number} x The x position of the mouse.
+	@param  {number} y The y position of the mouse.
+	@return {void} Nothing.
+	*/
     this.problemAreaHoverCallback = function(x, y) {
     		// Check if the answer panel is extended then retract the answer panel
         if(this.answerPanelState === this.panelState.EXTENDED) {
@@ -4574,8 +3293,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
     };
 
-	// ---------------------------------------------------------------------
-    // Retract the answer panel
+	/**
+	Retract the answer panel if it's extended and is not currently being tweened.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.retractAnswerPanel = function() {
 		// Check if the answer panel is locked before retracting it
         if(!this.answerPanelLock) {
@@ -4589,8 +3311,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
 	};
 
-	// ---------------------------------------------------------------------
-    // Extend the answer panel
+	/**
+	Extend the answer panel if it's retracted and is not currently being tweened.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.extendAnswerPanel = function() {
 		// Check if the answer panel is locked before extending it
         if(!this.answerPanelLock) {
@@ -4604,8 +3329,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
 	};
 
-	// ---------------------------------------------------------------------
-    // Retract the bottom panel
+	/**
+	Retract the bottom panel if it's extended and is not currently being tweened.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.retractBottomPanel = function() {
 		// Check if the bottom panel is locked before retracting it
         if(!this.bottomPanelLock) {
@@ -4619,8 +3347,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
 	};
 
-	// ---------------------------------------------------------------------
-    // Extend the bottom panel
+	/**
+	Extend the bottom panel if it's retracted and is not currently being tweened.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.extendBottomPanel = function() {
 		// Check if the bottom panel is locked before extending it
         if(!this.bottomPanelLock) {
@@ -4634,8 +3365,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
 	};
 
-	// ---------------------------------------------------------------------
-    // Called when the answer panel is done moving
+    /**
+	Called when the answer panel is done moving.
+	@param  {object} instance The reference to this template object instance.
+	@return {void} Nothing.
+	*/
 	this.answerMoveDone = function(instance) {
 		// Check if the answer panel is state is extending
         if(instance.answerPanelState === instance.panelState.EXTENDING) {
@@ -4655,8 +3389,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
 	};
 
-	// ---------------------------------------------------------------------
-    // Called when the bottom panel is done moving
+	/**
+	Called when the bottom panel is done moving.
+	@param  {object} instance The reference to this template object instance.
+	@return {void} Nothing.
+	*/
 	this.bottomMoveDone = function(instance) {
 		// Check if the bottom panel is state is extending
         if(instance.bottomPanelState === instance.panelState.EXTENDING) {
@@ -4676,8 +3413,12 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
 	};
 
-	// ---------------------------------------------------------------------
-    // Callback for the reset button
+    /**
+	Callback for when the reset button is pressed.
+	@param  {number} x The x position of the mouse.
+	@param  {number} y The y position of the mouse.
+	@return {void} Nothing.
+	*/
 	this.resetButtonClickCallback = function(x, y) {
 		// Check if in explore mode
 		if(this.boolExploring === true) {
@@ -4691,15 +3432,22 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
   	  	}
     };
 
-    // ---------------------------------------------------------------------
-    // Change the demo's title
+    /**
+	Change the title displayed at the top left corner of the demo.
+	@param  {string} title The string to replace the current title with.
+	@return {void} Nothing.
+	*/
     this.setTitle = function(title) {
         this.titleLabel.setText(title);
     };
 
-    // ---------------------------------------------------------------------
-    // Change the number of tries on the indicated scene
-    this.setTries = function(tries, scene) {
+    /**
+	Change the number of tries allowed for the passed in scene.
+	@param  {number} tries The new number of tries allowed for the passed in scene.
+	@param  {object} scene The scene to change the number of tries in.
+	@return {void} Nothing.
+	*/
+	this.setTries = function(tries, scene) {
         if(typeof tries !== "number") {
 			logError("Demo tried to set the number of tries with a non-numeric varible.");
             return;
@@ -4707,26 +3455,39 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         scene.setTries(tries);
     };
 
-    // ---------------------------------------------------------------------
-    // Returns the scene object at the specified indices
-    this.getScene = function(scene, step) {
+    /**
+	Return the scene object for the scene number passed in.
+	@param  {number} scene The scene number starting at 0.
+	@param  {number} step Depercated, used for scene with multiple steps.
+	@return {object} The scene object for the scene number passed in.
+	*/
+	this.getScene = function(scene, step) {
         return this.sceneArray[scene];
     };
 
-    // ---------------------------------------------------------------------
-    // Returns the scene object currently being presented
+    /**
+	Returns the scene object currently being presented.
+	@param  {void} Nothing.
+	@return {object} The scene object for the scene currently being presented.
+	*/
     this.getCurrentScene = function() {
         return this.getScene( this.currentScene );
     };
 
-    // ---------------------------------------------------------------------
-    // Returns an array with the scene number and the step number
+    /**
+	Returns the scene number currently being presented.
+	@param  {void} Nothing.
+	@return {number} The scene number for the scene currently being presented.
+	*/
     this.getSceneNumber = function() {
         return this.currentScene;
     };
 
-    // ---------------------------------------------------------------------
-    // Returns a flat array with each scene's id
+	/**
+	Returns a flat array with each scene's id.
+	@param  {void} Nothing.
+	@return {array} Returns a array of all the scene id's.
+	*/
     this.getFlatSceneIdList = function() {
         var flatSceneIdList = new Array();
 		flatSceneIdList.push(this.scnExplore.getId());
@@ -4738,8 +3499,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         return flatSceneIdList;
     };
 
-    // ---------------------------------------------------------------------
-    // Returns a flat array with each scene
+	/**
+	Returns a flat array with each scene.
+	@param  {void} Nothing.
+	@return {array} Returns a array of all the scene objects.
+	*/
     this.getFlatSceneList = function() {
         var flatSceneList = new Array();
 		flatSceneList.push(this.scnExplore);
@@ -4751,8 +3515,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         return flatSceneList;
     };
 
-    // ---------------------------------------------------------------------
-    // Called when the preloader has finished completely
+	/**
+	Called when the preloader has finished completely.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.donePreload = function() {
 		// Show 100% complete progress bar
         that.preload_loadingbar.setDimensions(240, 14);
@@ -4763,8 +3530,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         logDebug("Preload complete");
     };
 
-	// ---------------------------------------------------------------------
-    // Called when the preloader has finished loading a single resource
+	/**
+	Called when the preloader has finished loading a single resource
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.updatePreload = function(increment, total) {
 		// Update the width based on precent done
         var width = 240 * (increment/total);
@@ -4772,8 +3542,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         logDebug("loaded: " + increment / total);
     };
 
-    // ---------------------------------------------------------------------
-    // Start the demo
+    /**
+	Start the demo by preload all the images and running the initQuiz functions
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.begin = function() {
         plugin.hideSpinner();
 
@@ -4804,8 +3577,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         this.plugin.preload(this.preload_layer.getId(), sceneIdArray);
     };
 
-    // ---------------------------------------------------------------------
-    // Set up the next scene
+    /**
+	Change the current scene to the next scene
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.nextScene = function() {
 		clearTimeout(this.submissionRetryID);
 
@@ -4832,16 +3608,22 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 		}
     };
 
-    // ---------------------------------------------------------------------
-    // Changes the current scene to the one provided
+	/**
+	Change the current scene to the one provided
+	@param  {object} scene The new scene to change to.
+	@return {void} Nothing.
+	*/
     this.changeScene = function(scene) {
         this.plugin.setScene(scene.getId());
         this.drawUI();
 		this.getCurrentScene().loadQuiz();
     };
 
-    // ---------------------------------------------------------------------
-    // Set up the previous scene
+    /**
+	Change the current scene to the previous scene
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.prevScene = function() {
 		clearTimeout(this.submissionRetryID);
 
@@ -4863,11 +3645,13 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 		}
     };
 
-    // ---------------------------------------------------------------------
-    // Draw the current scene as well as the controls & menus
+    /**
+	Draw the current scene as well as the controls & menus.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.drawUI = function() {
         var scene = this.getCurrentScene();
-		//this.plugin.setScene(scene.getId());
 
 		if(scene.strInstruction === "") {
 			this.questionLabel.setVisibility(false);
@@ -4968,8 +3752,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         this.triesLabel.setText("Quiz: Submission chances left " + scene.getTries());
     };
 
-    // ---------------------------------------------------------------------
-    // Update the progress bar to reflect the current state of the demo
+	/**
+	Update the progress bar to reflect the current state of the demo.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.updateProgress = function() {
         	var progressWidth = 0;
         if(this.totalFinished === 0) {
@@ -5002,22 +3789,31 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
     };
 
-	// ---------------------------------------------------------------------
-    // Show the curtain and disable the interactive events
+	/**
+	Show the curtain and disable the interactive events
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.showCurtain = function() {
 		this.curtainLayer.setColor(0.0, 0.0, 0.0, 0.25);
 		this.plugin.setInteractive(false);
 	};
 
-	// ---------------------------------------------------------------------
-    // Hide the curtain and enable the interactive events
+	/**
+	Hide the curtain and enable the interactive events.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.hideCurtain = function() {
 		this.curtainLayer.setColor(0.0, 0.0, 0.0, 0.0);
 		this.plugin.setInteractive(true);
 	};
 
-    // ---------------------------------------------------------------------
-    // Show the instructions panel (auto-show the curtain)
+    /**
+	Show the instructions panel (auto-show the curtain).
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.showInstructions = function() {
 		// Make the OK button active during the curtain
         this.plugin.addSpecial(this.instructionsButton.getId());
@@ -5031,8 +3827,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         this.instructionsButton.subscribe();
     };
 
-    // ---------------------------------------------------------------------
-    // Hide the instructions panel
+    /**
+	Hide the instructions panel (auto-hide the curtain).
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.hideInstructions = function() {
    		// Make the OK button active during the curtain
         this.plugin.removeSpecial(this.instructionsButton.getId());
@@ -5053,8 +3852,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         }
     };
 
-    // ---------------------------------------------------------------------
-    // Change the actual text displayed in the instructions panel
+    /**
+	Change the actual text displayed in the instructions panel.
+	@param  {string} text The text to be displayed intstruction panel.
+	@return {void} Nothing.
+	*/
     this.setInstructionText = function(text) {
         if(typeof text != "string") {
             logError("Cannnot set text of label to non-string value");
@@ -5063,25 +3865,35 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         this.instructionsTextLabel.setText(text);
     };
 
-	// ---------------------------------------------------------------------
-    // The tell the template that the question has been answered correctly
+	/**
+	Change scene to the scene number passed in.
+	@param  {number} numQ The scene number starting at 0.
+	@param  {number} numS Depercated, used for scene with multiple steps.
+	@return {void} Nothing.
+	*/
 	this.gotoScene = function(numQ, numS) {
 		var scene = this.getScene(numQ, numS);
 		this.currentScene = numQ;
 		this.changeScene(scene);
 	};
 
-	// ---------------------------------------------------------------------
-    // Calls the current scenes clean up frist
+	/**
+	Calls the current scenes clean up frist and then displays the explore mode scene.
+	@param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.gotoExplore = function() {
-    		this.getCurrentScene().cleanUp();
-    		this.startExplore();
+    	this.getCurrentScene().cleanUp();
+    	this.startExplore();
     };
 
-    // ---------------------------------------------------------------------
-    // Draw the current scene as well as the controls & menus
+    /**
+	Builds up the passed in scene as well as the controls & menus
+    @param  {object} scene The scene object to add all the template resources to.
+	@return {void} Nothing.
+	*/
     this.buildScene = function(scene) {
-		// Add the problem layer, developer backgrond the the question label
+		// Add the problem layer, developer background the the question label
 		scene.addChild(this.problemLayer);
    		scene.addChild(scene.bgLayer);
         scene.addChild(this.questionLabel);
@@ -5090,12 +3902,12 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         scene.addChild(this.answerPanelLayer);
         scene.addChild(this.bottomPanelLayer);
 
-        	// Add the progress bar
+        // Add the progress bar
 		scene.addChild(this.progressBarSprite);
 		scene.addChild(this.progressMiddleSprite);
 		scene.addChild(this.progressLeftSprite);
 		scene.addChild(this.progressRightSprite);
-    	    scene.addChild(this.progressBarLabel);
+    	scene.addChild(this.progressBarLabel);
         scene.addChild(this.progressBarCount);
 
         // Add back to phone gap button if mobile
@@ -5107,8 +3919,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         scene.addChild(this.instructionsTextLabel);
 	};
 
-	// ---------------------------------------------------------------------
-    // Build the scene for explore mode
+	/**
+	Builds up the explore mode scene as well as the controls & menus
+    @param  {void} Nothing.
+	@return {void} Nothing.
+	*/
 	this.buildExplore = function() {
 		logDebug("Building up explore mode");
 
@@ -5139,8 +3954,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
         this.scnExplore.addChild(this.instructionsTextLabel);
 	};
 
-	// ---------------------------------------------------------------------
-    // Start explore mode
+	/**
+	Cleans up all previous scenes and display explore mode
+    @param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.startExplore = function() {
 		logDebug("Starting in explore mode");
 
@@ -5182,8 +4000,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 		this.scnExplore.loadQuiz();
     };
 
-    // ---------------------------------------------------------------------
-    // End explore mode
+    /**
+	Cleans up explore mode and displays the previous scene
+    @param  {void} Nothing.
+	@return {void} Nothing.
+	*/
     this.endExplore = function() {
 		logDebug("Exiting explore mode");
 
@@ -5209,38 +4030,51 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 		if(typeof this.scnLast !== 'undefined') this.changeScene(this.scnLast);
     };
 
-    // ---------------------------------------------------------------------
-    // Get the demo name for the quiz
+    /**
+	Get the demo name for this quiz
+	@param  {void} Nothing.
+	@return {string} Return the demo's name string.
+	*/
     this.js_getDemoName = function() {
 		return this.demo_name;
 	};
 
-	// ---------------------------------------------------------------------
-    // Set the demo name for the quiz
+	/**
+	Set the demo name for this quiz
+	@param  {string} passName The new demo's name string.
+	@return {void} Nothing.
+	*/
     this.js_setDemoName = function(passName) {
 		this.demo_name = passName;
 	};
 
-	// ---------------------------------------------------------------------
-    // Gets the number of quizzes in demo
+    /**
+	Gets the number of quizzes in demo
+	@param  {void} Nothing.
+	@return {number} Returns the number of quizzes in this demo
+	*/
     this.js_getNumberOfQuizzes = function() {
 		return this.sceneArray.length;
 	};
 
-	// ---------------------------------------------------------------------
-    // Gets the number of quizzes in demo
+	/**
+	Gets the number of quizzes in demo
+	@param  {void} Nothing.
+	@return {array} Return an array of each question's name.
+	*/
     this.js_getQuizNames = function() {
 		return this.quizNames;
 	};
 
-	// ---------------------------------------------------------------------
-    // Gets the number of quizzes in demo
-    this.js_onQuizSubmit = function( result1, result2 ) {
-		logDebug("answer received by server result1:" + result1 + " result2:" + result2);
-
+	/**
+	Called by the server when it's confirming it has recieved a submission.
+	@param  {string} result1 The name of the question that the server is confirming.
+	@param  {string} result2 The server returns "true" or "false" and if sent locally it will be "simulate".
+	@return {void} Nothing.
+	*/
+	this.js_onQuizSubmit = function( result1, result2 ) {
 		// Set server status to true
 		var intQuiz = parseInt(result1.substr(1), 10) - 1;
-
 		this.sceneArray[intQuiz].serverStatus = true;
 
 		// Clear previous timer
@@ -5257,8 +4091,11 @@ function THP_Template(plugin, width, height, sceneDescriptor) {
 		this.drawUI();
 	};
 
-	// ---------------------------------------------------------------------
-    // Gets the number of quizzes in demo
+    /**
+	Once this functions is called it will retry to sent the answer submission to the server every 8 seconds.
+	@param  {object} that The reference to this template object instance.
+	@return {void} Nothing.
+	*/
 	this.persistentSubmission = function(that) {
 		// Clear previous timer
 		clearTimeout(that.submissionRetryID);
