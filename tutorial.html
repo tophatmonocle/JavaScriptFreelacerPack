@@ -113,8 +113,8 @@
         </code>
         <p>Here each scene's setup code has been separated into functions.</p>
         <h3>Media URL</h3>
-            <p>In every demo we declare the mediaURL to point to the directory where all the media is located. The purpose is to able to change the location of all the media with just a single line of code. For instance while developing it's note required that you have a server to host media. Instead set the mediaURL to the local location of the media on the hard drive. Then when the demo is submitted to Top Hat Monocle we can easily change the mediaURL to point to our server.</p>
-            <p>For example, if you wanted to load all the images from a public DropBox, you might use the following code:</p>
+            <p>In every demo we declare the mediaURL to point to the directory where all the media is located. The purpose is to able to change the location of all the media with just a single line of code. For instance while developing you might user DropBox as a server to host media. Set the mediaURL to the local location of the media on the public DropBox. Then when the demo is submitted to Top Hat Monocle we can easily change the mediaURL to point to our server.</p>
+            <p>For example, if you wanted to load all the images from a public DropBox, you might use the following code (after uploading the images to a public DropBox folder):</p>
             <code class="sample langugage-javascript" language="javascript">
                 var mediaURL = "http://dl.dropbox.com/u/122872/img/Tutorial/";
                 var sprite = new Sprite(plugin, mediaURL + "top_hat.png", 50, 50, 100, 100);
