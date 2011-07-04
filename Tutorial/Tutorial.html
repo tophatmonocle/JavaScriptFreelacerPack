@@ -1,0 +1,18 @@
+<html>
+	<head>
+		<script type="text/javascript" src="THP_Library.js"></script>
+		<script type="text/javascript" src="Tutorial.js"></script>
+	</head>
+    <body>
+        <object id="myplugin" type="application/x-monoclegl" width="480" height="320"></object>
+		<script type="text/javascript" src="Main.js"></script>
+		<script type="text/javascript">
+			var plugin = document.getElementById("myplugin");
+			monoclegl_initialize(plugin)
+			if(window.startDemo) {
+				window.startDemo(plugin,"http://dl.dropbox.com/u/122872/img/Tutorial/");
+				//window.startDemo(plugin,"file:///Users/amackera/workspace/JSDemoSources/Testing/ZoomBox/assets/");
+			}
+		</script>
+    </body>
+</html>
